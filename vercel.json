@@ -1,4 +1,16 @@
 {
+  "redirects": [
+    {
+      "source": "/demo/sorrisopro",
+      "destination": "/demo/personapro",
+      "permanent": true
+    },
+    {
+      "source": "/sorrisopro",
+      "destination": "/personapro",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

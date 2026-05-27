@@ -19,7 +19,7 @@ export const clinic = {
   tagline: 'Odontologia premium com agenda inteligente',
   phone: '(11) 99876-4321',
   whatsapp: '(11) 99876-4321',
-  email: 'contato@sorrisopro.com.br',
+  email: 'contato@personapro.com.br',
   address: 'Av. Paulista, 1000 - Bela Vista, Sao Paulo',
   socials: ['Instagram', 'LinkedIn', 'Facebook'],
 };
