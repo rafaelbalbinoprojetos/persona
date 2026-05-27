@@ -9,8 +9,8 @@ export default function FAQ() {
         <SectionHeading
           align="left"
           eyebrow="FAQ"
-          title="Perguntas frequentes para reduzir duvidas e acelerar a decisao."
-          description="Conteudo preparado para crescer com regras da clinica, planos, formas de pagamento e protocolos de atendimento."
+          title="Perguntas frequentes para reduzir dúvidas e acelerar a decisão."
+          description="Conteúdo preparado para crescer com regras da clínica, planos, formas de pagamento e protocolos de atendimento."
         />
 
         <div className="space-y-4">

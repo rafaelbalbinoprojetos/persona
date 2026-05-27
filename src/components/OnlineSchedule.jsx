@@ -3,7 +3,7 @@ import { CalendarDays, Check, ChevronLeft, ChevronRight, Clock3, Phone, UserRoun
 import SectionHeading from './SectionHeading.jsx';
 import { scheduleOptions } from '../data/landingData.js';
 
-const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const monthFormatter = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 
@@ -38,12 +38,12 @@ export default function OnlineSchedule() {
           <SectionHeading
             align="left"
             eyebrow="Agenda online"
-            title="Um fluxo de agendamento claro, rapido e pronto para integrar com horarios reais."
+            title="Um fluxo de agendamento claro, rápido e pronto para integrar com horários reais."
             description="Mostre disponibilidade, organize preferencias e reduza atrito antes da primeira conversa com a recepcao."
           />
 
           <div className="mt-9 grid gap-4 sm:grid-cols-3">
-            {['Escolha o servico', 'Selecione horario', 'Confirme no WhatsApp'].map((item, index) => (
+            {['Escolha o serviço', 'Selecione horário', 'Confirme no WhatsApp'].map((item, index) => (
               <div key={item} className="rounded-3xl border border-slate-100 bg-[#fbfdff] p-5">
                 <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-600 text-sm font-extrabold text-white">{index + 1}</span>
                 <p className="mt-4 text-sm font-bold leading-6 text-brand-900">{item}</p>
@@ -59,11 +59,11 @@ export default function OnlineSchedule() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-bold uppercase text-brand-600">Nova consulta</p>
-                  <h3 className="mt-2 text-2xl font-extrabold text-brand-900">Agendar avaliacao</h3>
+                  <h3 className="mt-2 text-2xl font-extrabold text-brand-900">Agendar avaliação</h3>
                 </div>
                 <span className="inline-flex w-fit items-center gap-2 rounded-full bg-mint-50 px-4 py-2 text-sm font-bold text-mint-500">
                   <Check size={17} />
-                  {availableCount} horarios livres
+                  {availableCount} horários livres
                 </span>
               </div>
 
@@ -88,7 +88,7 @@ export default function OnlineSchedule() {
                   />
                 </div>
 
-                <Field icon={<CalendarDays size={20} />} label="Servico" value={scheduleOptions.services[0]} />
+                <Field icon={<CalendarDays size={20} />} label="Serviço" value={scheduleOptions.services[0]} />
                 <Field icon={<UserRound size={20} />} label="Profissional" value={scheduleOptions.professionals[0]} />
 
                 <div className="rounded-3xl border border-slate-100 bg-[#fbfdff] p-4">
@@ -114,7 +114,7 @@ export default function OnlineSchedule() {
                         type="button"
                         onClick={() => changeMonth(1)}
                         className="grid h-9 w-9 place-items-center rounded-full bg-white text-brand-900 transition hover:bg-brand-50"
-                        aria-label="Proximo mes"
+                        aria-label="Próximo mês"
                       >
                         <ChevronRight size={18} />
                       </button>

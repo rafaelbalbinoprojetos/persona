@@ -38,7 +38,7 @@ export default function Footer() {
             ))}
           </FooterColumn>
 
-          <FooterColumn title="Servicos">
+          <FooterColumn title="Serviços">
             {services.slice(0, 4).map((service) => (
               <a key={service.title} href="#servicos">{service.title}</a>
             ))}

@@ -1,14 +1,14 @@
 export const weekdayNames = {
   0: 'Domingo',
   1: 'Segunda',
-  2: 'Terca',
+  2: 'Terça',
   3: 'Quarta',
   4: 'Quinta',
   5: 'Sexta',
-  6: 'Sabado',
+  6: 'Sábado',
 };
 
-export const shortWeekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+export const shortWeekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 export const monthFormatter = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
 export const dateFormatter = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
 
@@ -27,8 +27,8 @@ export function getNextAvailabilityLabel(availability) {
   const nextRule = orderedRules[0];
   if (!nextRule) return 'Em breve';
   if (nextRule.distance === 0) return `Hoje as ${String(nextRule.start_time).slice(0, 5)}`;
-  if (nextRule.distance === 1) return `Amanha as ${String(nextRule.start_time).slice(0, 5)}`;
-  return `${weekdayNames[nextRule.weekday]} as ${String(nextRule.start_time).slice(0, 5)}`;
+  if (nextRule.distance === 1) return `Amanhã às ${String(nextRule.start_time).slice(0, 5)}`;
+  return `${weekdayNames[nextRule.weekday]} às ${String(nextRule.start_time).slice(0, 5)}`;
 }
 
 export function buildCalendarDays(monthDate) {

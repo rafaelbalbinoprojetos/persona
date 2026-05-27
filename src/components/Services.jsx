@@ -7,9 +7,9 @@ export default function Services() {
       <div className="section-shell">
         <div className="mx-auto flex justify-center">
           <SectionHeading
-            eyebrow="Servicos integrados"
-            title="Tudo que a clinica precisa para apresentar cuidado, tecnologia e resultado."
-            description="Servicos organizados para conversao, com textos prontos para evoluir para dados vindos do banco ou painel administrativo."
+            eyebrow="Serviços integrados"
+            title="Tudo que a clínica precisa para apresentar cuidado, tecnologia e resultado."
+            description="Serviços organizados para conversão, com textos prontos para evoluir para dados vindos do banco ou painel administrativo."
           />
         </div>
 

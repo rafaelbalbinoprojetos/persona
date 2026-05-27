@@ -10,7 +10,7 @@ export default function Testimonials() {
           <SectionHeading
             eyebrow="Depoimentos"
             title="Confianca percebida antes, durante e depois da consulta."
-            description="A prova social reforca seguranca para pacientes novos e evidencia o padrao de atendimento da clinica."
+            description="A prova social reforça segurança para pacientes novos e evidencia o padrão de atendimento da clínica."
           />
         </div>
 

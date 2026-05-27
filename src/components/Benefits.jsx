@@ -11,7 +11,7 @@ export default function Benefits() {
             align="left"
             eyebrow="Beneficios"
             title="Uma jornada mais leve para equipe e paciente."
-            description="A experiencia combina processos digitais com o cuidado proximo que uma clinica odontologica premium precisa transmitir."
+            description="A experiência combina processos digitais com o cuidado próximo que uma clínica odontológica premium precisa transmitir."
           />
           <a href="#agenda" className="pill-button mt-8 bg-brand-600 text-white shadow-glow hover:-translate-y-1 hover:bg-brand-700">
             Experimentar agenda online

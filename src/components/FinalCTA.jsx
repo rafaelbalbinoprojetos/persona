@@ -11,10 +11,10 @@ export default function FinalCTA() {
               Tecnologia, cuidado e previsibilidade
             </span>
             <h2 className="mt-6 max-w-3xl text-3xl font-extrabold leading-tight text-white sm:text-5xl">
-              Pronto para apresentar sua clinica com a experiencia premium que seus pacientes esperam?
+              Pronto para apresentar sua clínica com a experiência premium que seus pacientes esperam?
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-blue-100">
-              Use a primeira versao da PersonaPro como base para uma landing page real, conectada a agenda, profissionais e depoimentos do banco de dados.
+              Use a primeira versão da PersonaPro como base para uma landing page real, conectada a agenda, profissionais e depoimentos do banco de dados.
             </p>
           </div>
 
@@ -24,7 +24,7 @@ export default function FinalCTA() {
               Agendar consulta
             </a>
             <a href="#servicos" className="pill-button border border-white/20 bg-white/10 text-white hover:-translate-y-1 hover:bg-white/15">
-              Ver servicos
+              Ver serviços
               <ArrowRight size={18} />
             </a>
           </div>

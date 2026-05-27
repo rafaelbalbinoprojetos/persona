@@ -8,7 +8,7 @@ export default function Hero() {
       <div className="relative mx-auto min-h-[760px] max-w-[1500px] overflow-hidden rounded-[2.25rem] shadow-soft sm:min-h-[820px] lg:min-h-[860px]">
         <img
           src={heroImage}
-          alt="Paciente sorrindo em uma clinica odontologica moderna"
+          alt="Paciente sorrindo em uma clínica odontológica moderna"
           className="absolute inset-0 h-full w-full object-cover object-[64%_center]"
         />
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(248,251,255,0.98)_0%,rgba(248,251,255,0.93)_28%,rgba(248,251,255,0.62)_48%,rgba(248,251,255,0.08)_74%)]" />
@@ -18,7 +18,7 @@ export default function Hero() {
           <div className="max-w-[620px] animate-reveal">
             <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-brand-100 bg-white/75 px-5 py-3 text-sm font-bold text-brand-700 shadow-sm backdrop-blur">
               <Smile size={19} />
-              Clinica {clinic.name}
+              Clínica {clinic.name}
             </div>
 
             <h1 className="text-5xl font-extrabold leading-[1.06] text-brand-900 sm:text-6xl lg:text-7xl">
@@ -26,7 +26,7 @@ export default function Hero() {
             </h1>
 
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Tecnologia avancada, profissionais especializados e um atendimento humanizado para voce sorrir com confianca todos os dias.
+              Tecnologia avançada, profissionais especializados e um atendimento humanizado para você sorrir com confiança todos os dias.
             </p>
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -36,7 +36,7 @@ export default function Hero() {
               </a>
               <a href="#servicos" className="pill-button border border-brand-200 bg-white/70 text-brand-900 shadow-sm backdrop-blur hover:-translate-y-1 hover:bg-white hover:text-brand-600">
                 <Play size={18} fill="currentColor" />
-                Conhecer servicos
+                Conhecer serviços
               </a>
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function Hero() {
               <CalendarDays size={24} />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-500">Proxima disponibilidade</p>
+              <p className="text-sm font-semibold text-slate-500">Próxima disponibilidade</p>
               <p className="mt-1 text-xl font-extrabold text-brand-500">Hoje as 15:30</p>
             </div>
             <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-50 text-brand-600">
@@ -87,7 +87,7 @@ export default function Hero() {
               <CheckCircle2 size={21} />
             </span>
             <div>
-              <p className="font-extrabold text-brand-900">Clinica verificada</p>
+              <p className="font-extrabold text-brand-900">Clínica verificada</p>
               <p className="text-xs font-semibold text-slate-500">Equipe certificada</p>
             </div>
           </div>

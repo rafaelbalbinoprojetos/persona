@@ -381,8 +381,8 @@ export default function OnboardingPage() {
                     Links usados na hero, CTA final e footer da página pública.
                   </p>
                   <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                    <Input label="Instagram" value={form.instagramUrl} onChange={(value) => updateField('instagramUrl', value)} placeholder="@usuario ou URL" />
-                    <Input label="TikTok" value={form.tiktokUrl} onChange={(value) => updateField('tiktokUrl', value)} placeholder="@usuario ou URL" />
+                    <Input label="Instagram" value={form.instagramUrl} onChange={(value) => updateField('instagramUrl', value)} placeholder="@usuário ou URL" />
+                    <Input label="TikTok" value={form.tiktokUrl} onChange={(value) => updateField('tiktokUrl', value)} placeholder="@usuário ou URL" />
                     <Input label="LinkedIn" value={form.linkedinUrl} onChange={(value) => updateField('linkedinUrl', value)} placeholder="https://linkedin.com/in/..." />
                     <Input label="Facebook" value={form.facebookUrl} onChange={(value) => updateField('facebookUrl', value)} placeholder="https://facebook.com/..." />
                     <Input label="YouTube" value={form.youtubeUrl} onChange={(value) => updateField('youtubeUrl', value)} placeholder="https://youtube.com/..." />

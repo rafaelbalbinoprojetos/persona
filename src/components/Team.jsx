@@ -9,7 +9,7 @@ export default function Team() {
         <div className="mx-auto flex justify-center">
           <SectionHeading
             eyebrow="Equipe especialista"
-            title="Profissionais apresentados com autoridade, empatia e conversao."
+            title="Profissionais apresentados com autoridade, empatia e conversão."
             description="Cards prontos para receber fotos, especialidades, disponibilidade e indicadores reais de cada profissional."
           />
         </div>

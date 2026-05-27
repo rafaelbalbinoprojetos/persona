@@ -123,13 +123,13 @@ export function AppearanceEditor({
             label="Instagram"
             value={business.instagram_url || ''}
             onChange={(value) => updateBusiness('instagram_url', value)}
-            placeholder="@usuario ou URL"
+            placeholder="@usuário ou URL"
           />
           <Input
             label="TikTok"
             value={business.tiktok_url || ''}
             onChange={(value) => updateBusiness('tiktok_url', value)}
-            placeholder="@usuario ou URL"
+            placeholder="@usuário ou URL"
           />
           <Input
             label="LinkedIn"

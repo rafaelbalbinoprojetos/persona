@@ -16,42 +16,42 @@ import {
 } from 'lucide-react';
 
 const segments = [
-  { name: 'Clinicas odontologicas', Icon: Stethoscope },
-  { name: 'Estetica e harmonizacao', Icon: Sparkles },
+  { name: 'Clínicas odontológicas', Icon: Stethoscope },
+  { name: 'Estética e harmonização', Icon: Sparkles },
   { name: 'Barbearias', Icon: Scissors },
-  { name: 'Saloes de beleza', Icon: WandSparkles },
-  { name: 'Consultorios', Icon: ShieldCheck },
-  { name: 'Servicos por agenda', Icon: Store },
+  { name: 'Salões de beleza', Icon: WandSparkles },
+  { name: 'Consultórios', Icon: ShieldCheck },
+  { name: 'Serviços por agenda', Icon: Store },
 ];
 
 const features = [
   {
     title: 'Pagina personalizada por profissional',
-    description: 'Nome, especialidade, imagem principal, servicos, galeria e depoimentos carregados automaticamente.',
+    description: 'Nome, especialidade, imagem principal, serviços, galeria e depoimentos carregados automaticamente.',
     Icon: Paintbrush,
   },
   {
     title: 'Agenda online inteligente',
-    description: 'Dias, horarios, intervalos e bloqueios preparados para dados vindos do Supabase.',
+    description: 'Dias, horários, intervalos e bloqueios preparados para dados vindos do Supabase.',
     Icon: CalendarCheck,
   },
   {
     title: 'Painel pronto para evoluir',
-    description: 'Base pensada para o profissional editar marca pessoal, servicos, horarios e conteudo da landing.',
+    description: 'Base pensada para o profissional editar marca pessoal, serviços, horários e conteúdo da landing.',
     Icon: LayoutDashboard,
   },
   {
     title: 'Controle multi-tenant',
-    description: 'Cada empresa opera seus proprios dados com isolamento por business_id e regras de seguranca.',
+    description: 'Cada empresa opera seus próprios dados com isolamento por business_id e regras de segurança.',
     Icon: ShieldCheck,
   },
 ];
 
 const steps = [
   'Preencha dados do profissional',
-  'Cadastre servicos premium',
-  'Defina dias e horarios',
-  'Publique a pagina com agenda',
+  'Cadastre serviços premium',
+  'Defina dias e horários',
+  'Publique a página com agenda',
 ];
 
 export default function SaaSHome() {
@@ -65,17 +65,17 @@ export default function SaaSHome() {
             <div className="animate-reveal">
               <span className="inline-flex items-center gap-2 rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-bold text-brand-700 shadow-sm">
                 <BadgeCheck size={18} />
-                SaaS de agendamento personalizavel
+                SaaS de agendamento personalizável
               </span>
               <h1 className="mt-7 max-w-4xl text-5xl font-extrabold leading-[1.04] sm:text-6xl lg:text-7xl">
-                Crie paginas com agenda online para qualquer negocio que atende por horario.
+                Crie páginas com agenda online para qualquer negócio que atende por horário.
               </h1>
               <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-                Uma plataforma para clinicas, saloes, barbearias e esteticistas venderem melhor, receberem agendamentos e manterem sua presenca digital sempre atualizada.
+                Uma plataforma para clínicas, salões, barbearias e esteticistas venderem melhor, receberem agendamentos e manterem sua presença digital sempre atualizada.
               </p>
               <div className="mt-10 flex flex-col gap-4 sm:flex-row">
                 <a href="/onboarding" className="pill-button bg-brand-600 text-white shadow-glow hover:-translate-y-1 hover:bg-brand-700">
-                  Criar minha pagina
+                  Criar minha página
                   <ArrowRight size={18} />
                 </a>
                 <a href="/demo/personapro" className="pill-button border border-slate-200 bg-white text-brand-900 shadow-sm hover:-translate-y-1 hover:border-brand-200 hover:text-brand-600">
@@ -97,17 +97,17 @@ export default function SaaSHome() {
 
                   <div className="mt-6 grid gap-4 sm:grid-cols-2">
                     <Metric title="Agendamentos" value="148" Icon={CalendarCheck} />
-                    <Metric title="Taxa de conversao" value="38%" Icon={BarChart3} />
+                    <Metric title="Taxa de conversão" value="38%" Icon={BarChart3} />
                     <Metric title="Tempo medio" value="42min" Icon={Clock3} />
-                    <Metric title="Servicos ativos" value="12" Icon={Sparkles} />
+                    <Metric title="Serviços ativos" value="12" Icon={Sparkles} />
                   </div>
 
                   <div className="mt-6 rounded-3xl bg-white p-5">
                     <div className="mb-4 flex items-center justify-between">
-                      <p className="font-extrabold">Proximos horarios</p>
+                      <p className="font-extrabold">Próximos horários</p>
                       <span className="text-sm font-bold text-brand-600">Hoje</span>
                     </div>
-                    {['Limpeza de pele - 14:00', 'Corte premium - 15:30', 'Avaliacao - 17:00'].map((item) => (
+                    {['Limpeza de pele - 14:00', 'Corte premium - 15:30', 'Avaliação - 17:00'].map((item) => (
                       <div key={item} className="mb-3 flex items-center gap-3 rounded-2xl bg-[#f8fbff] p-3 last:mb-0">
                         <CheckCircle2 size={19} className="text-mint-500" />
                         <span className="text-sm font-bold text-slate-600">{item}</span>
@@ -124,7 +124,7 @@ export default function SaaSHome() {
           <div className="section-shell">
             <div className="mx-auto max-w-3xl text-center">
               <p className="text-sm font-extrabold uppercase text-brand-600">Segmentos</p>
-              <h2 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">Um motor de agenda para varios mercados.</h2>
+              <h2 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">Um motor de agenda para vários mercados.</h2>
             </div>
             <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {segments.map(({ name, Icon }) => (
@@ -143,9 +143,9 @@ export default function SaaSHome() {
           <div className="section-shell grid gap-10 lg:grid-cols-[0.85fr_1.15fr]">
             <div>
               <p className="text-sm font-extrabold uppercase text-brand-600">Produto</p>
-              <h2 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">Personalizacao, agenda e dados no mesmo fluxo.</h2>
+              <h2 className="mt-4 text-4xl font-extrabold leading-tight sm:text-5xl">Personalização, agenda e dados no mesmo fluxo.</h2>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                A base foi pensada para ler tudo do Supabase e montar paginas publicas automaticamente para cada cliente.
+                A base foi pensada para ler tudo do Supabase e montar páginas públicas automaticamente para cada cliente.
               </p>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
@@ -168,7 +168,7 @@ export default function SaaSHome() {
               <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
                 <div>
                   <p className="text-sm font-extrabold uppercase text-brand-100">Como funciona</p>
-                  <h2 className="mt-4 text-4xl font-extrabold leading-tight text-white sm:text-5xl">Do formulario inicial a uma pagina publicada.</h2>
+                  <h2 className="mt-4 text-4xl font-extrabold leading-tight text-white sm:text-5xl">Do formulário inicial a uma página publicada.</h2>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {steps.map((step, index) => (
@@ -180,7 +180,7 @@ export default function SaaSHome() {
                 </div>
               </div>
               <a href="/onboarding" className="pill-button mt-10 bg-white text-brand-700 hover:-translate-y-1 hover:bg-brand-50">
-                Comecar configuracao
+                Começar configuração
                 <ArrowRight size={18} />
               </a>
             </div>
@@ -206,7 +206,7 @@ function SaaSHeader() {
           <a href="#recursos" className="text-sm font-semibold text-slate-600 hover:text-brand-600">Recursos</a>
           <a href="/demo/personapro" className="text-sm font-semibold text-slate-600 hover:text-brand-600">Demo</a>
         </div>
-        <a href="/onboarding" className="pill-button bg-brand-600 text-white shadow-glow hover:bg-brand-700">Criar pagina</a>
+        <a href="/onboarding" className="pill-button bg-brand-600 text-white shadow-glow hover:bg-brand-700">Criar página</a>
       </nav>
     </header>
   );

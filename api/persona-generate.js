@@ -79,8 +79,8 @@ export default async function handler(request, response) {
 
 function buildSystemPrompt() {
   return `
-Voce e a IA PERSONA, consultor de posicionamento, copywriter e estruturador de paginas profissionais premium.
-Gere SOMENTE JSON valido. Nao escreva Markdown. Nao gere codigo React.
+Você é a IA PERSONA, consultor de posicionamento, copywriter e estruturador de páginas profissionais premium.
+Gere SOMENTE JSON válido. Não escreva Markdown. Não gere código React.
 
 O JSON deve seguir exatamente esta estrutura:
 {
@@ -96,18 +96,18 @@ O JSON deve seguir exatamente esta estrutura:
 
 Regras:
 - Textos premium, curtos e sofisticados.
-- Evite frases genericas como "solucoes inovadoras", "qualidade e excelencia", "referencia no mercado".
-- Se depende de horario marcado, conversion.mode = "appointment".
-- Se vende projeto/orcamento, conversion.mode = "request".
+- Evite frases genéricas como "soluções inovadoras", "qualidade e excelência", "referência no mercado".
+- Se depende de horário marcado, conversion.mode = "appointment".
+- Se vende projeto/orçamento, conversion.mode = "request".
 - Se vende analise estrategica, conversion.mode = "consultation".
 - Se for captacao simples, conversion.mode = "lead".
 - Saude/odontologia: themeKey "soft-medical" ou "minimal-white".
 - Advocacia/consultoria executiva: "dark-luxury" ou "executive-black".
 - Tecnologia/desenvolvimento: "neo-corporate".
 - Creator/artista: "creator-mode" ou "editorial-black".
-- Estetica/luxo: "gold-prestige" ou "minimal-white".
+- Estética/luxo: "gold-prestige" ou "minimal-white".
 - Slug em minusculas, sem acentos, com hifens.
-- Se telefone, email, imagem ou redes nao forem citados, retorne string vazia.
+- Se telefone, email, imagem ou redes não forem citados, retorne string vazia.
 `.trim();
 }
 
@@ -143,7 +143,7 @@ function buildFallbackConfig(prompt) {
   const isDental = /dent|odonto|sorriso|implante|clareamento/.test(lower);
   const isBeauty = /estetic|beleza|cabelo|barb|harmoniza/.test(lower);
   const mode = isDental || isBeauty ? 'appointment' : isLegal ? 'consultation' : isTech ? 'request' : 'lead';
-  const segment = isDental ? 'odontologia' : isLegal ? 'advocacia' : isTech ? 'desenvolvimento de sistemas' : isBeauty ? 'estetica' : 'servicos profissionais';
+  const segment = isDental ? 'odontologia' : isLegal ? 'advocacia' : isTech ? 'desenvolvimento de sistemas' : isBeauty ? 'estética' : 'serviços profissionais';
   const name = isLegal ? 'Profissional Jurídico' : isTech ? 'Especialista em Sistemas' : isDental ? 'Profissional de Odontologia' : 'Profissional Persona';
 
   return {

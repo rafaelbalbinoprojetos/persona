@@ -5,7 +5,7 @@ export default function Header() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-white/70 bg-white/85 backdrop-blur-xl">
       <nav className="section-shell flex h-20 items-center justify-between">
-        <a href="#top" className="flex items-center gap-3" aria-label="Inicio PersonaPro">
+        <a href="#top" className="flex items-center gap-3" aria-label="Início PersonaPro">
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow">
             <Smile size={24} />
           </span>

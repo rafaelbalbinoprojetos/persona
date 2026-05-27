@@ -36,13 +36,13 @@ export function getUnsupportedImageReason(value) {
     && !isLikelyImageCdnUrl(cleanValue)
     && !isDirectImageUrl(cleanValue);
 
-  if (isInstagramPage) return 'Use a URL direta da imagem do Instagram, nao o link do post.';
+  if (isInstagramPage) return 'Use a URL direta da imagem do Instagram, não o link do post.';
 
   const isFacebookPage = /facebook\.com\/|fb\.watch\//i.test(cleanValue)
     && !isLikelyImageCdnUrl(cleanValue)
     && !isDirectImageUrl(cleanValue);
 
-  if (isFacebookPage) return 'Use a URL direta da imagem do Facebook, nao o link da publicacao.';
+  if (isFacebookPage) return 'Use a URL direta da imagem do Facebook, não o link da publicação.';
 
   return '';
 }

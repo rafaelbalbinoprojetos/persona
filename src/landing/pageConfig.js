@@ -55,7 +55,7 @@ function normalizeServices(services, preset) {
 
   return preset.services.slice(0, 4).map((name, index) => ({
     name,
-    description: `Servico sugerido para ${preset.label.toLowerCase()}, pronto para personalizacao no painel.`,
+    description: `Serviço sugerido para ${preset.label.toLowerCase()}, pronto para personalização no painel.`,
     duration: index === 0 ? 30 : 45,
     price: '',
     image_url: '',
