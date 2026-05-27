@@ -11,8 +11,22 @@ import {
   Trash2,
 } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
+import { PersonaOnboarding } from '../persona/PersonaOnboarding.jsx';
 
-const segments = ['Odontologia', 'Estética', 'Barbearia', 'Salão de beleza', 'Clínica', 'Outro'];
+const segments = [
+  'Odontologia',
+  'Estética',
+  'Barbearia',
+  'Salão de beleza',
+  'Clínica',
+  'Advocacia',
+  'Consultoria',
+  'Desenvolvimento de sistemas',
+  'Arquitetura',
+  'Design',
+  'Fitness',
+  'Outro',
+];
 const weekdays = [
   { label: 'Seg', value: 1 },
   { label: 'Ter', value: 2 },
@@ -34,6 +48,12 @@ const initialForm = {
   heroTitle: '',
   heroSubtitle: '',
   heroImageUrl: '',
+  themeKey: 'soft-medical',
+  professionalName: '',
+  specialty: '',
+  signatureTitle: 'Assinatura profissional',
+  signatureText: '',
+  signatureTags: [],
   instagramUrl: '',
   tiktokUrl: '',
   linkedinUrl: '',
@@ -52,14 +72,40 @@ const initialForm = {
       { days: [1, 2, 3, 4, 5], startTime: '12:00', endTime: '13:00', reason: 'Almoço' },
     ],
   },
+  conversion: {
+    mode: 'appointment',
+    title: 'Escolha uma data e horário disponível',
+    subtitle: 'O calendário respeita horários, pausas, bloqueios e agendamentos já cadastrados.',
+    buttonLabel: 'Solicitar agendamento',
+    successMessage: 'Solicitação cadastrada com sucesso. Em breve enviaremos a confirmação.',
+    showSchedule: true,
+    requestServiceTypes: [],
+  },
+  faqs: [],
+  finalCta: {
+    title: 'Pronto para dar o próximo passo?',
+    subtitle: '',
+    buttonLabel: 'Solicitar atendimento',
+  },
 };
 
 export default function OnboardingPage() {
+  const [entryMode, setEntryMode] = useState('choice');
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(initialForm);
   const [saveState, setSaveState] = useState({ status: 'idle', message: '' });
   const payload = useMemo(() => buildPayload(form), [form]);
   const currentStep = onboardingSteps[step];
+
+  function applyPersonaForm(nextForm) {
+    setForm(nextForm);
+    setStep(onboardingSteps.length - 1);
+    setEntryMode('manual');
+    setSaveState({
+      status: 'idle',
+      message: 'Configuração gerada com IA. Revise os dados antes de salvar no Supabase.',
+    });
+  }
 
   function updateField(field, value) {
     setForm((current) => ({
@@ -232,6 +278,16 @@ export default function OnboardingPage() {
     });
   }
 
+  if (entryMode === 'choice') {
+    return (
+      <PersonaOnboarding
+        initialForm={initialForm}
+        onApply={applyPersonaForm}
+        onManual={() => setEntryMode('manual')}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f8fbff]">
       <header className="border-b border-white bg-white/85 backdrop-blur-xl">
@@ -242,7 +298,12 @@ export default function OnboardingPage() {
             </span>
             <span className="text-xl font-extrabold">Persona</span>
           </a>
-          <a href="/demo/personapro" className="hidden text-sm font-bold text-brand-600 sm:inline-flex">Ver demo</a>
+          <div className="flex items-center gap-5">
+            <button onClick={() => setEntryMode('choice')} className="hidden text-sm font-bold text-brand-600 sm:inline-flex">
+              Criar com IA
+            </button>
+            <a href="/demo/personapro" className="hidden text-sm font-bold text-brand-600 sm:inline-flex">Ver demo</a>
+          </div>
         </nav>
       </header>
 
@@ -295,6 +356,10 @@ export default function OnboardingPage() {
 
             {step === 1 && (
               <div className="grid gap-5">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Input label="Nome do profissional" value={form.professionalName} onChange={(value) => updateField('professionalName', value)} placeholder="Ex: Dra. Joana Silva" />
+                  <Input label="Especialidade" value={form.specialty} onChange={(value) => updateField('specialty', value)} placeholder="Odontologia estética" />
+                </div>
                 <div className="grid gap-5 sm:grid-cols-[180px_1fr]">
                   <label className="rounded-3xl border border-slate-100 bg-[#fbfdff] p-4">
                     <span className="text-xs font-bold uppercase text-slate-400">Cor principal</span>
@@ -309,6 +374,7 @@ export default function OnboardingPage() {
                 </div>
                 <Input label="Título da hero" value={form.heroTitle} onChange={(value) => updateField('heroTitle', value)} placeholder="Cuidamos de você com excelência" />
                 <Textarea label="Subtítulo da hero" value={form.heroSubtitle} onChange={(value) => updateField('heroSubtitle', value)} placeholder="Descreva a promessa principal do negócio." />
+                <Textarea label="Assinatura profissional" value={form.signatureText} onChange={(value) => updateField('signatureText', value)} placeholder="Descreva a filosofia, método ou diferencial do profissional." />
                 <div className="rounded-[2rem] border border-slate-100 bg-[#fbfdff] p-5">
                   <h3 className="text-xl font-extrabold text-brand-900">Presença social</h3>
                   <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
@@ -520,6 +586,8 @@ function Input({ label, value, onChange, placeholder, type = 'text', prefix, ico
 }
 
 function Select({ label, value, onChange, options }) {
+  const normalizedOptions = options.includes(value) ? options : [value, ...options].filter(Boolean);
+
   return (
     <label className="block rounded-3xl border border-slate-100 bg-[#fbfdff] p-4">
       <span className="mb-3 block text-xs font-bold uppercase text-slate-400">{label}</span>
@@ -528,7 +596,7 @@ function Select({ label, value, onChange, options }) {
         onChange={(event) => onChange(event.target.value)}
         className="w-full rounded-2xl border border-slate-100 bg-white px-4 py-3 text-sm font-bold text-brand-900 outline-none focus:border-brand-200 focus:ring-4 focus:ring-brand-50"
       >
-        {options.map((option) => (
+        {normalizedOptions.map((option) => (
           <option key={option} value={option}>{option}</option>
         ))}
       </select>
@@ -607,9 +675,13 @@ function buildPayload(form) {
     },
     business_branding: {
       primary_color: form.primaryColor,
+      theme_key: form.themeKey,
       hero_title: form.heroTitle,
       hero_subtitle: form.heroSubtitle,
       hero_image_url: form.heroImageUrl,
+      hero_badge: form.specialty || form.segment,
+      cta_primary_text: form.conversion.buttonLabel,
+      cta_secondary_text: 'Conhecer assinatura profissional',
     },
     business_locations: {
       name: 'Unidade principal',
@@ -617,7 +689,11 @@ function buildPayload(form) {
       is_main: true,
     },
     services: form.services.filter((service) => service.name),
-    professionals: form.businessName ? [{ name: form.businessName, specialty: form.segment }] : [],
+    professionals: form.businessName ? [{
+      name: form.professionalName || form.businessName,
+      specialty: form.specialty || form.segment,
+      bio: form.signatureText,
+    }] : [],
     availability_rules: form.schedule.days.map((weekday) => ({
       weekday,
       start_time: form.schedule.startTime,
@@ -633,12 +709,28 @@ function buildPayload(form) {
       }))
     )),
     conversion: {
-      mode: 'appointment',
-      title: 'Escolha uma data e horário disponível',
-      subtitle: 'O calendário respeita horários, pausas, bloqueios e agendamentos já cadastrados.',
-      buttonLabel: 'Solicitar agendamento',
-      successMessage: 'Solicitação cadastrada com sucesso. Em breve enviaremos a confirmação.',
-      showSchedule: true,
+      ...form.conversion,
+    },
+    faqs: form.faqs,
+    finalCta: form.finalCta,
+    socials: {
+      instagram: form.instagramUrl,
+      tiktok: form.tiktokUrl,
+      linkedin: form.linkedinUrl,
+      facebook: form.facebookUrl,
+      youtube: form.youtubeUrl,
+      website: form.websiteUrl,
+    },
+    enabledModules: {
+      hero: true,
+      services: true,
+      professionals: false,
+      schedule: true,
+      testimonials: false,
+      faq: form.faqs.length > 0,
+      gallery: false,
+      location: true,
+      finalCta: true,
     },
   };
 }
