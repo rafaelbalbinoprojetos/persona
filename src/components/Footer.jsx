@@ -55,7 +55,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-slate-100 pt-6 text-sm font-semibold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 SorrisoPro. Todos os direitos reservados.</p>
+          <p>© 2026 PersonaPro. Todos os direitos reservados.</p>
           <p>Landing page SaaS pronta para evoluir.</p>
         </div>
       </div>

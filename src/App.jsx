@@ -24,7 +24,12 @@ export default function App() {
     );
   }
 
-  if (pathname === '/demo/sorrisopro' || pathname === '/sorrisopro') {
+  if (
+    pathname === '/demo/personapro'
+    || pathname === '/personapro'
+    || pathname === '/demo/sorrisopro'
+    || pathname === '/sorrisopro'
+  ) {
     return <ClientLanding />;
   }
 

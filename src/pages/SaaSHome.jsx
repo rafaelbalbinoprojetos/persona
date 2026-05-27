@@ -78,8 +78,8 @@ export default function SaaSHome() {
                   Criar minha pagina
                   <ArrowRight size={18} />
                 </a>
-                <a href="/demo/sorrisopro" className="pill-button border border-slate-200 bg-white text-brand-900 shadow-sm hover:-translate-y-1 hover:border-brand-200 hover:text-brand-600">
-                  Ver demo odontologica
+                <a href="/demo/personapro" className="pill-button border border-slate-200 bg-white text-brand-900 shadow-sm hover:-translate-y-1 hover:border-brand-200 hover:text-brand-600">
+                  Ver demo PersonaPro
                 </a>
               </div>
             </div>
@@ -199,12 +199,12 @@ function SaaSHeader() {
           <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow">
             <CalendarCheck size={23} />
           </span>
-          <span className="text-xl font-extrabold">AgendaPro SaaS</span>
+          <span className="text-xl font-extrabold">Persona</span>
         </a>
         <div className="hidden items-center gap-8 lg:flex">
           <a href="#segmentos" className="text-sm font-semibold text-slate-600 hover:text-brand-600">Segmentos</a>
           <a href="#recursos" className="text-sm font-semibold text-slate-600 hover:text-brand-600">Recursos</a>
-          <a href="/demo/sorrisopro" className="text-sm font-semibold text-slate-600 hover:text-brand-600">Demo</a>
+          <a href="/demo/personapro" className="text-sm font-semibold text-slate-600 hover:text-brand-600">Demo</a>
         </div>
         <a href="/onboarding" className="pill-button bg-brand-600 text-white shadow-glow hover:bg-brand-700">Criar pagina</a>
       </nav>

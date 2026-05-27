@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export const clinic = {
-  name: 'SorrisoPro',
+  name: 'PersonaPro',
   tagline: 'Odontologia premium com agenda inteligente',
   phone: '(11) 99876-4321',
   whatsapp: '(11) 99876-4321',
@@ -151,7 +151,7 @@ export const faqs = [
     answer: 'Sim. A plataforma permite escolher servico, profissional, data e horario disponivel para confirmar a avaliacao.',
   },
   {
-    question: 'A SorrisoPro envia lembretes de consulta?',
+    question: 'A PersonaPro envia lembretes de consulta?',
     answer: 'Sim. Os lembretes podem ser enviados por WhatsApp, e-mail e notificacoes conforme a preferencia do paciente.',
   },
   {

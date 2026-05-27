@@ -240,9 +240,9 @@ export default function OnboardingPage() {
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-600 text-white shadow-glow">
               <CalendarCheck size={23} />
             </span>
-            <span className="text-xl font-extrabold">AgendaPro SaaS</span>
+            <span className="text-xl font-extrabold">Persona</span>
           </a>
-          <a href="/demo/sorrisopro" className="hidden text-sm font-bold text-brand-600 sm:inline-flex">Ver demo</a>
+          <a href="/demo/personapro" className="hidden text-sm font-bold text-brand-600 sm:inline-flex">Ver demo</a>
         </nav>
       </header>
 

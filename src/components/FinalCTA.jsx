@@ -14,7 +14,7 @@ export default function FinalCTA() {
               Pronto para apresentar sua clinica com a experiencia premium que seus pacientes esperam?
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-blue-100">
-              Use a primeira versao da SorrisoPro como base para uma landing page real, conectada a agenda, profissionais e depoimentos do banco de dados.
+              Use a primeira versao da PersonaPro como base para uma landing page real, conectada a agenda, profissionais e depoimentos do banco de dados.
             </p>
           </div>
 
