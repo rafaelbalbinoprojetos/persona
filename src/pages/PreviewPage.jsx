@@ -141,6 +141,30 @@ function PreviewLanding({ submission }) {
     await saveSubmission(nextSubmission);
   }
 
+  async function updatePrimaryProfessionalText(field, value) {
+    const cleanValue = String(value || '').trim();
+    if (!cleanValue) return;
+    const nextSubmission = withPrimaryProfessionalField(localSubmission, field, cleanValue);
+    setLocalSubmission(nextSubmission);
+    await saveSubmission(nextSubmission);
+  }
+
+  async function updateServiceText(index, field, value) {
+    const cleanValue = String(value || '').trim();
+    if (!cleanValue) return;
+    const nextSubmission = withServiceField(localSubmission, index, field, cleanValue, config.services);
+    setLocalSubmission(nextSubmission);
+    await saveSubmission(nextSubmission);
+  }
+
+  async function updateFinalCtaText(field, value) {
+    const cleanValue = String(value || '').trim();
+    if (!cleanValue) return;
+    const nextSubmission = withFinalCtaField(localSubmission, field, cleanValue);
+    setLocalSubmission(nextSubmission);
+    await saveSubmission(nextSubmission);
+  }
+
   async function uploadHeroImage(file) {
     if (!file || !session?.user?.id) return;
     if (!file.type.startsWith('image/')) {
@@ -153,6 +177,7 @@ function PreviewLanding({ submission }) {
     }
 
     setEditStatus({ type: 'saving', message: 'Enviando imagem...' });
+    const previousImageUrl = getCurrentHeroImageUrl(localSubmission);
     const extension = getFileExtension(file);
     const path = `${session.user.id}/${localSubmission.slug}/hero-${Date.now()}.${extension}`;
     const { error: uploadError } = await supabase.storage
@@ -173,7 +198,10 @@ function PreviewLanding({ submission }) {
     const publicUrl = data.publicUrl;
     const nextSubmission = withBrandingField(localSubmission, 'hero_image_url', publicUrl);
     setLocalSubmission(nextSubmission);
-    await saveSubmission(nextSubmission, 'Imagem atualizada.');
+    const saved = await saveSubmission(nextSubmission, 'Imagem atualizada.');
+    if (saved) {
+      await removePreviousLandingAsset(previousImageUrl, publicUrl, session.user.id);
+    }
   }
 
   async function signOut() {
@@ -206,16 +234,38 @@ function PreviewLanding({ submission }) {
             editMode={canEdit}
             editStatus={editStatus}
             onHeroTextChange={updateHeroText}
+            onProfessionalTextChange={updatePrimaryProfessionalText}
             onHeroImageUpload={uploadHeroImage}
           />
         )}
-        {modules.services && <ServicesModule config={config} theme={config.theme} />}
-        {modules.services && <SignatureModule config={config} theme={config.theme} />}
+        {modules.services && (
+          <ServicesModule
+            config={config}
+            theme={config.theme}
+            editMode={canEdit}
+            onServiceTextChange={updateServiceText}
+          />
+        )}
+        {modules.services && (
+          <SignatureModule
+            config={config}
+            theme={config.theme}
+            editMode={canEdit}
+            onProfessionalTextChange={updatePrimaryProfessionalText}
+          />
+        )}
         {modules.gallery && <GalleryModule config={config} theme={config.theme} />}
         {modules.schedule && <ConversionModule config={config} theme={config.theme} />}
         {modules.testimonials && <TestimonialsModule config={config} theme={config.theme} />}
         {modules.faq && <FAQModule config={config} theme={config.theme} />}
-        {modules.finalCta && <FinalCTAModule config={config} theme={config.theme} />}
+        {modules.finalCta && (
+          <FinalCTAModule
+            config={config}
+            theme={config.theme}
+            editMode={canEdit}
+            onFinalCtaTextChange={updateFinalCtaText}
+          />
+        )}
       </main>
 
       {modules.footer && <FooterModule config={config} theme={config.theme} />}
@@ -236,6 +286,85 @@ function withBrandingField(submission, field, value) {
     payload: {
       ...payload,
       business_branding: nextBranding,
+    },
+  };
+}
+
+function getCurrentHeroImageUrl(submission) {
+  return submission.payload?.business_branding?.hero_image_url || submission.hero_image_url || '';
+}
+
+async function removePreviousLandingAsset(previousUrl, nextUrl, userId) {
+  const previousPath = getLandingAssetPath(previousUrl, userId);
+  const nextPath = getLandingAssetPath(nextUrl, userId);
+  if (!previousPath || previousPath === nextPath) return;
+
+  await supabase.storage.from('landing-assets').remove([previousPath]);
+}
+
+function getLandingAssetPath(fileUrl, userId) {
+  if (!fileUrl || !userId) return '';
+
+  try {
+    const url = new URL(fileUrl);
+    const marker = '/storage/v1/object/public/landing-assets/';
+    const markerIndex = url.pathname.indexOf(marker);
+    if (markerIndex === -1) return '';
+
+    const path = decodeURIComponent(url.pathname.slice(markerIndex + marker.length));
+    return path.startsWith(`${userId}/`) ? path : '';
+  } catch {
+    return '';
+  }
+}
+
+function withPrimaryProfessionalField(submission, field, value) {
+  const payload = submission.payload || {};
+  const professionals = Array.isArray(payload.professionals) ? payload.professionals : [];
+  const first = professionals[0] || {
+    name: payload.businesses?.name || submission.business_name || '',
+    specialty: payload.businesses?.segment || submission.segment || '',
+    bio: '',
+    photo_url: '',
+  };
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      professionals: [{ ...first, [field]: value }, ...professionals.slice(1)],
+    },
+  };
+}
+
+function withServiceField(submission, index, field, value, fallbackServices = []) {
+  const payload = submission.payload || {};
+  const currentServices = Array.isArray(payload.services) && payload.services.length
+    ? payload.services
+    : fallbackServices;
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      services: currentServices.map((service, itemIndex) =>
+        itemIndex === index ? { ...service, [field]: value } : service,
+      ),
+    },
+  };
+}
+
+function withFinalCtaField(submission, field, value) {
+  const payload = submission.payload || {};
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      finalCta: {
+        ...(payload.finalCta || payload.final_cta || {}),
+        [field]: value,
+      },
     },
   };
 }

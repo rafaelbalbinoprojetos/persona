@@ -13,6 +13,7 @@ export function HeroModule({
   editMode = false,
   editStatus,
   onHeroTextChange,
+  onProfessionalTextChange,
   onHeroImageUpload,
 }) {
   const { business, branding, preset, services, availability } = config;
@@ -72,14 +73,26 @@ export function HeroModule({
               className={cardClass(theme, 'mb-7 inline-flex items-center gap-3 px-5 py-3 text-sm font-bold text-[var(--preview-primary)] shadow-sm')}
             >
               <Sparkles size={19} />
-              {specialty}
+              <span
+                className={editMode ? 'cursor-text rounded-lg outline-none ring-2 ring-transparent focus:bg-white/10 focus:px-1.5 focus:ring-[var(--preview-primary)]/30' : ''}
+                contentEditable={editMode}
+                suppressContentEditableWarning
+                onBlur={(event) => onProfessionalTextChange?.('specialty', event.currentTarget.textContent)}
+              >
+                {specialty}
+              </span>
             </motion.span>
             <motion.p variants={reveal} className="text-sm font-extrabold uppercase tracking-[0.28em] text-[var(--preview-primary)]">
               Marca profissional premium
             </motion.p>
             <motion.h1
               variants={reveal}
-              className="mt-5 max-w-4xl text-5xl font-black leading-[0.98] tracking-[-0.035em] sm:text-6xl lg:text-8xl"
+              className={`mt-5 max-w-4xl rounded-2xl text-5xl font-black leading-[0.98] tracking-[-0.035em] outline-none sm:text-6xl lg:text-8xl ${
+                editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
+              }`}
+              contentEditable={editMode}
+              suppressContentEditableWarning
+              onBlur={(event) => onProfessionalTextChange?.('name', event.currentTarget.textContent)}
             >
               {professionalName}
             </motion.h1>

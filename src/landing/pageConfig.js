@@ -46,6 +46,7 @@ export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
     availability: payload.availability_rules || [],
     availabilityBreaks: payload.availability_breaks || [],
     availabilityDateBlocks: payload.availability_date_blocks || [],
+    finalCta: payload.finalCta || payload.final_cta || {},
     conversion: normalizeConversion(payload.conversion, preset, services),
   };
 }

@@ -6,7 +6,7 @@ import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
 import { getServiceEmotionalLine } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
 
-export function ServicesModule({ config, theme }) {
+export function ServicesModule({ config, theme, editMode = false, onServiceTextChange }) {
   const { services, preset } = config;
 
   return (
@@ -26,7 +26,7 @@ export function ServicesModule({ config, theme }) {
         >
           {services.map((service, index) => (
             <motion.article
-              key={`${service.name}-${index}`}
+              key={index}
               variants={reveal}
               whileHover={{ y: -10, scale: 1.01 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -43,11 +43,27 @@ export function ServicesModule({ config, theme }) {
                     {service.duration || service.duration_minutes || 30} min
                   </span>
                 </div>
-                <h3 className="text-3xl font-black tracking-[-0.025em]">{service.name}</h3>
+                <h3
+                  className={`rounded-xl text-3xl font-black tracking-[-0.025em] outline-none ${
+                    editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-2 focus:py-1 focus:ring-[var(--preview-primary)]/25' : ''
+                  }`}
+                  contentEditable={editMode}
+                  suppressContentEditableWarning
+                  onBlur={(event) => onServiceTextChange?.(index, 'name', event.currentTarget.textContent)}
+                >
+                  {service.name}
+                </h3>
                 <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--preview-primary)]/80">
                   {getServiceEmotionalLine(config.vertical, index)}
                 </p>
-                <p className="mt-5 leading-8 text-[var(--preview-muted)]">
+                <p
+                  className={`mt-5 rounded-xl leading-8 text-[var(--preview-muted)] outline-none ${
+                    editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-2 focus:py-1 focus:ring-[var(--preview-primary)]/25' : ''
+                  }`}
+                  contentEditable={editMode}
+                  suppressContentEditableWarning
+                  onBlur={(event) => onServiceTextChange?.(index, 'description', event.currentTarget.textContent)}
+                >
                   {service.description || `Uma experiência personalizada e cuidadosamente conduzida para ${preset.label.toLowerCase()}.`}
                 </p>
                 {service.price && (

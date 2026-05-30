@@ -3,7 +3,7 @@ import { cardClass } from './theme.js';
 import { getFeaturedProfessional, getSignaturePillars } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
 
-export function SignatureModule({ config, theme }) {
+export function SignatureModule({ config, theme, editMode = false, onProfessionalTextChange }) {
   const professional = getFeaturedProfessional(config);
   const philosophy = professional.bio || config.preset.professionalBio;
   const pillars = getSignaturePillars(config.vertical);
@@ -34,7 +34,16 @@ export function SignatureModule({ config, theme }) {
             className={cardClass(theme, 'p-7 shadow-[var(--preview-shadow)]')}
             style={{ borderRadius: theme.radius }}
           >
-            <p className="text-xl font-semibold leading-9 text-[var(--preview-text)]">{philosophy}</p>
+            <p
+              className={`rounded-2xl text-xl font-semibold leading-9 text-[var(--preview-text)] outline-none ${
+                editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-3 focus:py-2 focus:ring-[var(--preview-primary)]/25' : ''
+              }`}
+              contentEditable={editMode}
+              suppressContentEditableWarning
+              onBlur={(event) => onProfessionalTextChange?.('bio', event.currentTarget.textContent)}
+            >
+              {philosophy}
+            </p>
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
               {pillars.map((pillar) => (
                 <div
