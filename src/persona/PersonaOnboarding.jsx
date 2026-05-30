@@ -4,6 +4,8 @@ import { mergePersonaWithDefaults, normalizePersonaPayload, validatePersonaPaylo
 
 const examples = [
   'Sou dentista em Contagem e quero divulgar clareamento, implantes e limpeza com uma página premium para transmitir confiança e permitir agendamentos.',
+  'Tenho um sítio com piscina, área gourmet e campo em Betim. Quero alugar para fins de semana, festas pequenas e encontros familiares com solicitação de reserva.',
+  'Tenho um salão de festas para aniversários e eventos corporativos. Quero mostrar fotos, estrutura, capacidade e receber pedidos de data.',
   'Sou advogado empresarial e quero captar consultas estratégicas com uma presença sofisticada, objetiva e segura.',
   'Sou desenvolvedor e quero apresentar meus serviços de sistemas sob medida, automações e consultoria para empresas.',
   'Sou cabeleireiro e quero receber agendamentos para cortes, coloração e tratamentos premium.',
@@ -20,7 +22,7 @@ export function PersonaOnboarding({ initialForm, onApply, onManual }) {
     const trimmedPrompt = prompt.trim();
     if (trimmedPrompt.length < 20) {
       setState('error');
-      setMessage('Descreva um pouco mais sobre o profissional, serviços e objetivo da página.');
+      setMessage('Descreva um pouco mais sobre o profissional, negócio, local, serviço e objetivo da página.');
       return;
     }
 
@@ -96,10 +98,10 @@ export function PersonaOnboarding({ initialForm, onApply, onManual }) {
                 Criar com IA
               </span>
               <h1 className="mt-6 max-w-3xl text-4xl font-black leading-tight tracking-[-0.03em] text-brand-900 sm:text-5xl lg:text-6xl">
-                Descreva o profissional. A Persona estrutura a página.
+                Descreva o profissional, negócio ou espaço. A Persona estrutura a página.
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-                A IA gera uma configuração inicial com posicionamento, copy, serviços, tema, modo de atendimento e FAQ. Você revisa tudo antes de salvar.
+                A IA entende serviços, consultorias, reservas, locações e experiências agendáveis. Ela gera posicionamento, copy, tema, atendimento e FAQ para você revisar antes de salvar.
               </p>
 
               <div className="mt-8 grid gap-3">
@@ -132,7 +134,7 @@ export function PersonaOnboarding({ initialForm, onApply, onManual }) {
                 <textarea
                   value={prompt}
                   onChange={(event) => setPrompt(event.target.value.slice(0, 2200))}
-                  placeholder="Conte sobre o profissional, serviço, público, cidade, diferenciais e objetivo da página..."
+                  placeholder="Conte sobre o profissional, negócio, local, serviço, público, cidade, diferenciais, estrutura e objetivo da página..."
                   rows={10}
                   className="w-full resize-none rounded-[1.5rem] border border-slate-100 bg-white px-5 py-4 text-sm font-semibold leading-7 text-brand-900 outline-none placeholder:text-slate-300 focus:border-brand-200 focus:ring-4 focus:ring-brand-50"
                 />

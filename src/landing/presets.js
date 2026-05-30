@@ -100,6 +100,20 @@ export const verticalPresets = {
     services: ['Compra assistida', 'Venda de imóveis', 'Avaliação', 'Locação'],
     professionalBio: 'Consultoria com leitura de mercado, curadoria e acompanhamento em cada decisão.',
   },
+  venue: {
+    key: 'venue',
+    label: 'Espaços e reservas',
+    recommendedTheme: 'warm-minimal',
+    tone: 'visual, acolhedor, claro e experiencial',
+    Icon: Home,
+    sectionLabels: { services: 'Opções de reserva', professionals: 'Experiência', schedule: 'Reservar data' },
+    heroFallback: {
+      title: 'Um espaço preparado para viver bons momentos.',
+      subtitle: 'Estrutura, conforto e reserva simples para fins de semana, eventos e encontros especiais.',
+    },
+    services: ['Fim de semana', 'Diária para eventos', 'Celebrações familiares', 'Reserva privativa'],
+    professionalBio: 'Experiência pensada para receber pessoas com conforto, privacidade e uma jornada simples do interesse à reserva.',
+  },
   wellness: {
     key: 'wellness',
     label: 'Bem-estar',
@@ -150,6 +164,7 @@ export function detectVertical(segment = '') {
   if (/med|clin|saude|saúde/.test(value)) return 'medical';
   if (/consult|business|mentoria/.test(value)) return 'consulting';
   if (/fit|personal|academ|treino/.test(value)) return 'fitness';
+  if (/sitio|sítio|chac|fazenda|temporada|hosped|pousada|loca|alug|reserva|evento|festa|salao|salão|quadra|estudio|estúdio/.test(value)) return 'venue';
   if (/imob|real|estate/.test(value)) return 'realEstate';
   if (/tech|ia|startup|software/.test(value)) return 'technology';
   if (/psico|terap|well|bem/.test(value)) return 'wellness';

@@ -1,4 +1,4 @@
-const appointmentSegments = ['dent', 'odonto', 'barb', 'cabel', 'estetic', 'psicol', 'fisio', 'personal'];
+const appointmentSegments = ['dent', 'odonto', 'barb', 'cabel', 'estetic', 'psicol', 'fisio', 'personal', 'sitio', 'sítio', 'chacara', 'chácara', 'loca', 'alug', 'reserva', 'hosped', 'temporada', 'evento', 'salao', 'salão', 'quadra', 'estudio', 'estúdio'];
 const requestSegments = ['sistema', 'software', 'design', 'arquitet', 'marketing', 'fotograf'];
 const consultationSegments = ['advog', 'jurid', 'consult', 'mentor', 'contador', 'empresa'];
 
@@ -183,6 +183,7 @@ export function getThemeByVertical(vertical = '') {
   if (/sistema|software|tecnolog|desenvolv|ia|startup/.test(value)) return 'neo-corporate';
   if (/creator|artist|foto|video|conteudo|tatu/.test(value)) return 'creator-mode';
   if (/estetic|beleza|luxo|harmoniza/.test(value)) return 'gold-prestige';
+  if (/sitio|sítio|chacara|chácara|loca|alug|reserva|hosped|temporada|evento|salao|salão|quadra|estudio|estúdio/.test(value)) return 'warm-minimal';
   return 'minimal-white';
 }
 
@@ -295,6 +296,7 @@ function suggestedServices(segment) {
   const value = String(segment).toLowerCase();
   if (/advog|jurid/.test(value)) return ['Análise jurídica inicial', 'Consultoria preventiva', 'Estratégia processual'];
   if (/sistema|software|desenvolv/.test(value)) return ['Diagnóstico de processos', 'Sistema sob medida', 'Automação operacional'];
+  if (/sitio|sítio|chacara|chácara|loca|alug|reserva|hosped|temporada|evento|salao|salão|quadra|estudio|estúdio/.test(value)) return ['Fim de semana', 'Diária para evento', 'Reserva privativa'];
   if (/odonto|dent/.test(value)) return ['Avaliação inicial', 'Clareamento', 'Limpeza preventiva'];
   if (/estetic|beleza/.test(value)) return ['Avaliação estética', 'Protocolo personalizado', 'Acompanhamento premium'];
   return ['Avaliação inicial', 'Atendimento personalizado', 'Consultoria profissional'];

@@ -570,6 +570,7 @@ export default function DashboardPage() {
     setStatus({ type: 'saving', message: 'Excluindo página...' });
     const { data: userData } = await supabase.auth.getUser();
     const userId = userData?.user?.id;
+    const assetPaths = userId ? collectLandingAssetPaths(page, userId) : [];
 
     const { error } = await supabase
       .from('onboarding_submissions')
@@ -582,7 +583,7 @@ export default function DashboardPage() {
     }
 
     if (userId && page.slug) {
-      await removeStorageFolder(`${userId}/${page.slug}`);
+      await removePageStorageAssets(`${userId}/${page.slug}`, assetPaths);
     }
 
     setStatus({ type: 'success', message: 'Página excluída.' });
@@ -928,17 +929,60 @@ function normalizeGalleryPayload(items) {
   }));
 }
 
-async function removeStorageFolder(prefix) {
-  if (!prefix) return;
+async function removePageStorageAssets(prefix, knownPaths = []) {
+  const paths = new Set(knownPaths.filter(Boolean));
+
+  if (prefix) {
+    const folderPaths = await listStorageFolderPaths(prefix);
+    folderPaths.forEach((path) => paths.add(path));
+  }
+
+  if (paths.size) {
+    await supabase.storage.from('landing-assets').remove([...paths]);
+  }
+}
+
+async function listStorageFolderPaths(prefix) {
+  if (!prefix) return [];
 
   const { data, error } = await supabase.storage.from('landing-assets').list(prefix, { limit: 100 });
-  if (error || !data?.length) return;
+  if (error || !data?.length) return [];
 
-  const paths = data
+  return data
     .filter((item) => item.name)
     .map((item) => `${prefix}/${item.name}`);
+}
 
-  if (paths.length) {
-    await supabase.storage.from('landing-assets').remove(paths);
+function collectLandingAssetPaths(page, userId) {
+  const paths = new Set();
+
+  for (const value of collectStringValues(page)) {
+    const path = getLandingAssetPath(value, userId);
+    if (path) paths.add(path);
+  }
+
+  return [...paths];
+}
+
+function collectStringValues(value) {
+  if (typeof value === 'string') return [value];
+  if (Array.isArray(value)) return value.flatMap(collectStringValues);
+  if (!value || typeof value !== 'object') return [];
+  return Object.values(value).flatMap(collectStringValues);
+}
+
+function getLandingAssetPath(fileUrl, userId) {
+  if (!fileUrl || !userId) return '';
+
+  try {
+    const url = new URL(fileUrl);
+    const marker = '/storage/v1/object/public/landing-assets/';
+    const markerIndex = url.pathname.indexOf(marker);
+    if (markerIndex === -1) return '';
+
+    const path = decodeURIComponent(url.pathname.slice(markerIndex + marker.length));
+    return path.startsWith(`${userId}/`) ? path : '';
+  } catch {
+    return '';
   }
 }

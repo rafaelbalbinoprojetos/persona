@@ -544,7 +544,7 @@ export default function OnboardingPage() {
                 className="pill-button bg-brand-600 text-white shadow-glow hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
               >
                 {step === onboardingSteps.length - 1
-                  ? saveState.status === 'saving' ? 'Salvando...' : 'Salvar no Supabase'
+                  ? saveState.status === 'saving' ? 'Salvando...' : 'Salvar'
                   : 'Continuar'}
                 <ArrowRight size={18} />
               </button>
