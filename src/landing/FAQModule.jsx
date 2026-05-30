@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CheckCircle2, ChevronDown } from 'lucide-react';
 import { cardClass } from './theme.js';
-import { normalizeFaqs } from './landingUtils.js';
+import { isVenueVertical, normalizeFaqs } from './landingUtils.js';
 import { SectionIntro, cinematicEase, reveal, stagger } from './LandingShared.jsx';
 
 export function FAQModule({ config, theme }) {
   const faqs = normalizeFaqs(config.faqs, config);
   const [openIndex, setOpenIndex] = useState(0);
+  const isVenue = isVenueVertical(config.vertical);
 
   if (!faqs.length) return null;
 
@@ -16,8 +17,8 @@ export function FAQModule({ config, theme }) {
       <div className="section-shell">
         <SectionIntro
           eyebrow="FAQ"
-          title="Clareza antes do primeiro contato"
-          description="Respostas diretas em uma experiência leve, premium e sem atrito."
+          title={isVenue ? 'Clareza antes da reserva' : 'Clareza antes do primeiro contato'}
+          description={isVenue ? 'Informações essenciais para decidir, consultar disponibilidade e reservar sem atrito.' : 'Respostas diretas em uma experiência leve, premium e sem atrito.'}
         />
         <motion.div
           className="mx-auto mt-14 grid max-w-4xl gap-4"

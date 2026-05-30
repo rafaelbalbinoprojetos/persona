@@ -37,7 +37,10 @@ export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
       hero_title: branding.hero_title || fallbackHero.title,
       hero_subtitle: branding.hero_subtitle || fallbackHero.subtitle,
     },
-    location: payload.business_locations || {},
+    location: {
+      ...(payload.business_locations || {}),
+      address: payload.business_locations?.address || business.address || submission.address || '',
+    },
     services,
     professionals: payload.professionals || [],
     testimonials: payload.testimonials || [],
@@ -65,6 +68,7 @@ function normalizeServices(services, preset) {
 
 function normalizeConversion(conversion = {}, preset, services = []) {
   const mode = conversion.mode || conversion.conversionMode || 'appointment';
+  const isVenueAppointment = preset.key === 'venue' && mode === 'appointment';
   const defaults = {
     appointment: {
       title: 'Escolha uma data e horário disponível',
@@ -92,15 +96,27 @@ function normalizeConversion(conversion = {}, preset, services = []) {
       successMessage: 'Mensagem enviada com sucesso.',
     },
   };
-  const fallback = defaults[mode] || defaults.appointment;
+  const venueAppointmentDefaults = {
+    title: 'Escolha a data da reserva',
+    subtitle: 'Consulte disponibilidade para fim de semana, evento ou diária e envie os detalhes principais.',
+    buttonLabel: 'Solicitar reserva',
+    successMessage: 'Reserva solicitada com sucesso. Em breve enviaremos a confirmação.',
+  };
+  const fallback = isVenueAppointment ? venueAppointmentDefaults : defaults[mode] || defaults.appointment;
   const serviceOptions = services.map((service) => service.name).filter(Boolean);
+  const rawTitle = conversion.title || conversion.conversionTitle || '';
+  const rawSubtitle = conversion.subtitle || conversion.conversionSubtitle || '';
+  const rawButtonLabel = conversion.buttonLabel || conversion.conversionButtonLabel || '';
+  const rawSuccessMessage = conversion.successMessage || conversion.conversionSuccessMessage || '';
+  const genericAppointmentTitle = /^escolha uma data e hor[aá]rio dispon[ií]vel$/i.test(rawTitle.trim());
+  const genericAppointmentButton = /^solicitar agendamento$/i.test(rawButtonLabel.trim());
 
   return {
     mode,
-    title: conversion.title || conversion.conversionTitle || fallback.title,
-    subtitle: conversion.subtitle || conversion.conversionSubtitle || fallback.subtitle,
-    buttonLabel: conversion.buttonLabel || conversion.conversionButtonLabel || fallback.buttonLabel,
-    successMessage: conversion.successMessage || conversion.conversionSuccessMessage || fallback.successMessage,
+    title: isVenueAppointment && genericAppointmentTitle ? fallback.title : rawTitle || fallback.title,
+    subtitle: rawSubtitle || fallback.subtitle,
+    buttonLabel: isVenueAppointment && genericAppointmentButton ? fallback.buttonLabel : rawButtonLabel || fallback.buttonLabel,
+    successMessage: rawSuccessMessage || fallback.successMessage,
     showSchedule: conversion.showSchedule ?? fallback.showSchedule ?? mode === 'appointment',
     meetingFormats: conversion.meetingFormats || ['Online', 'Presencial', 'WhatsApp'],
     requestServiceTypes: normalizeOptions(conversion.requestServiceTypes, serviceOptions, preset.services),

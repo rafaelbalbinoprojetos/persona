@@ -34,6 +34,111 @@ export function getSocialLinks(config) {
     }));
 }
 
+export function isVenueVertical(vertical) {
+  return vertical === 'venue';
+}
+
+export function getHeroMicrocopy(config) {
+  const isVenue = isVenueVertical(config.vertical);
+  return {
+    eyebrow: isVenue ? 'Espaço para reserva' : 'Marca profissional premium',
+    primaryCta: isVenue ? 'Reservar agora' : 'Agendar agora',
+    secondaryCta: isVenue ? 'Conhecer o espaço' : 'Conhecer assinatura profissional',
+    trustTitle: isVenue ? 'Reserva facilitada' : 'Presença verificada',
+    countLabel: isVenue ? 'opções de reserva' : 'experiências disponíveis',
+    socialTitle: isVenue ? 'Canal oficial ativo' : 'Presença digital ativa',
+    availabilitySubtitle: isVenue ? 'Próxima data disponível' : 'Próxima disponibilidade',
+  };
+}
+
+export function getServicesIntroCopy(config) {
+  if (isVenueVertical(config.vertical)) {
+    return {
+      title: 'Opções para reservar o espaço',
+      description: 'Apresente usos, datas e formatos de reserva com clareza para transformar interesse em pedidos reais.',
+      cardPrefix: 'Opção',
+      durationSuffix: 'min',
+      emptyDescription: `Uma opção de reserva pronta para personalização em ${config.preset.label.toLowerCase()}.`,
+    };
+  }
+
+  return {
+    title: 'Experiências desenhadas com intenção',
+    description: 'Serviços apresentados com clareza, desejo e alinhamento a uma presença premium.',
+    cardPrefix: 'Experiência',
+    durationSuffix: 'min',
+    emptyDescription: `Uma experiência personalizada e cuidadosamente conduzida para ${config.preset.label.toLowerCase()}.`,
+  };
+}
+
+export function getSignatureIntroCopy(config) {
+  if (isVenueVertical(config.vertical)) {
+    return {
+      eyebrow: 'Experiência do espaço',
+      title: 'Estrutura pensada para receber bem em cada reserva.',
+    };
+  }
+
+  return {
+    eyebrow: 'Assinatura profissional',
+    title: 'Uma forma própria de atender, orientar e transformar.',
+  };
+}
+
+export function getFooterCopy(config) {
+  if (isVenueVertical(config.vertical)) {
+    return {
+      description: 'Espaço com reserva simples, apresentação clara e experiência pensada para bons momentos.',
+      contactFallback: 'Reserva, localização e contato reunidos em uma experiência direta.',
+      servicesTitle: 'Reservas',
+      exploreServicesLabel: 'Reservas',
+    };
+  }
+
+  return {
+    description: `${config.preset.label} com presença digital premium, experiência autoral e agenda inteligente.`,
+    contactFallback: 'Presença digital premium para profissionais.',
+    servicesTitle: 'Experiências',
+    exploreServicesLabel: 'Experiências',
+  };
+}
+
+export function getScheduleCopy(config) {
+  if (isVenueVertical(config.vertical)) {
+    return {
+      title: 'Escolha a data da reserva',
+      description: 'Consulte dias disponíveis, bloqueios e horários cadastrados para solicitar sua reserva.',
+      unavailable: 'Sem reserva',
+      noServiceDate: 'Não haverá reserva nesta data.',
+      noTimes: 'Nenhum horário configurado para este dia.',
+      reasonLabel: 'Detalhes da reserva',
+      reasonPlaceholder: 'Ex: fim de semana, aniversário, quantidade de pessoas',
+      savingLabel: 'Cadastrando reserva...',
+      buttonLabel: 'Solicitar reserva',
+      successMessage: 'Reserva solicitada com sucesso. Em breve enviaremos a confirmação.',
+      invalidFallback: 'Revise os dados para solicitar a reserva.',
+      noRuleMessage: 'Escolha uma data com reserva disponível.',
+      blockedMessage: 'Esta data está bloqueada para reserva.',
+    };
+  }
+
+  return {
+    title: 'Escolha uma data e horário disponível',
+    description: 'O calendário respeita horários, pausas, bloqueios e agendamentos já cadastrados.',
+    unavailable: 'Sem atendimento',
+    noServiceDate: 'Não haverá atendimento nesta data.',
+    noTimes: 'Nenhum horário configurado para este dia.',
+    reasonLabel: 'Motivo do agendamento',
+    reasonPlaceholder: 'Ex: avaliação, retorno, consulta inicial',
+    savingLabel: 'Cadastrando agendamento...',
+    buttonLabel: 'Solicitar agendamento',
+    successMessage: 'Agendamento solicitado com sucesso. Em breve enviaremos a confirmação.',
+    invalidFallback: 'Revise os dados para solicitar o agendamento.',
+    noRuleMessage: 'Escolha uma data com atendimento disponível.',
+    blockedMessage: 'Esta data está bloqueada para atendimento.',
+  };
+}
+
 function normalizeSocialUrl(value, label) {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -70,6 +175,7 @@ export function getServiceEmotionalLine(vertical, index) {
     consulting: ['Método e direção', 'Decisões com clareza', 'Execução com foco'],
     fitness: ['Performance consciente', 'Evolução acompanhada', 'Consistência real'],
     wellness: ['Presença e acolhimento', 'Equilíbrio personalizado', 'Ritual de cuidado'],
+    venue: ['Conforto para reunir', 'Reserva sem atrito', 'Estrutura para aproveitar'],
   };
   const list = lines[vertical] || ['Experiência personalizada', 'Atendimento autoral', 'Cuidado premium'];
   return list[index % list.length];
@@ -86,6 +192,7 @@ export function getSignaturePillars(vertical) {
     fitness: ['Performance', 'Técnica', 'Constância'],
     wellness: ['Presença', 'Equilíbrio', 'Acolhimento'],
     technology: ['Inovação', 'Método', 'Escala'],
+    venue: ['Conforto', 'Privacidade', 'Reserva'],
   };
   return pillars[vertical] || ['Presença', 'Método', 'Experiência'];
 }
@@ -133,6 +240,23 @@ export function normalizeFaqs(items = [], config) {
 
   const serviceLabel = config.preset.sectionLabels.services.toLowerCase();
   const scheduleLabel = config.preset.sectionLabels.schedule.toLowerCase();
+  if (isVenueVertical(config.vertical)) {
+    return [
+      {
+        question: 'Como funciona a reserva?',
+        answer: 'Você escolhe a data desejada, envia os detalhes principais e recebe o retorno para confirmação de disponibilidade.',
+      },
+      {
+        question: 'Quais opções de reserva estão disponíveis?',
+        answer: 'A página apresenta os principais formatos cadastrados para o espaço, como fim de semana, diária ou eventos.',
+      },
+      {
+        question: 'Como recebo a confirmação?',
+        answer: 'A solicitação fica registrada para acompanhamento e confirmação dos próximos passos da reserva.',
+      },
+    ];
+  }
+
   return [
     {
       question: `Como funciona o ${scheduleLabel}?`,

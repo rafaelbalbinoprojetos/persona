@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ImagePlus, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
-import { getServiceEmotionalLine } from './landingUtils.js';
+import { getServiceEmotionalLine, getServicesIntroCopy } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
 
 export function ServicesModule({
@@ -16,14 +16,15 @@ export function ServicesModule({
   onRemoveService,
 }) {
   const { services, preset } = config;
+  const copy = getServicesIntroCopy(config);
 
   return (
     <section id="servicos" className="bg-[var(--preview-bg)] py-28">
       <div className="section-shell">
         <SectionIntro
           eyebrow={preset.sectionLabels.services}
-          title="Experiências desenhadas com intenção"
-          description="Serviços apresentados como uma assinatura profissional: claros, desejáveis e alinhados a uma presença premium."
+          title={copy.title}
+          description={copy.description}
         />
         {editMode && (
           <div className="mt-8 flex justify-center">
@@ -78,10 +79,10 @@ export function ServicesModule({
               <div className="p-8">
                 <div className="mb-5 flex items-center justify-between gap-4">
                   <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--preview-primary)]">
-                    Experiência {String(index + 1).padStart(2, '0')}
+                    {copy.cardPrefix} {String(index + 1).padStart(2, '0')}
                   </p>
                   <span className="rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 py-1 text-xs font-extrabold text-[var(--preview-muted)]">
-                    {service.duration || service.duration_minutes || 30} min
+                    {service.duration || service.duration_minutes || 30} {copy.durationSuffix}
                   </span>
                 </div>
                 <h3
@@ -105,7 +106,7 @@ export function ServicesModule({
                   suppressContentEditableWarning
                   onBlur={(event) => onServiceTextChange?.(index, 'description', event.currentTarget.textContent)}
                 >
-                  {service.description || `Uma experiência personalizada e cuidadosamente conduzida para ${preset.label.toLowerCase()}.`}
+                  {service.description || copy.emptyDescription}
                 </p>
                 {service.price && (
                   <p className="mt-7 text-lg font-black text-[var(--preview-primary)]">

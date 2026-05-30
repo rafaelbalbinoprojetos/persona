@@ -42,21 +42,21 @@ export function normalizePersonaPayload(raw = {}) {
       primaryColor: normalizeColor(branding.primaryColor || business.primaryColor || '#2563eb'),
       themeKey: cleanText(branding.themeKey || getThemeByVertical(segment)),
       heroImageUrl: cleanUrl(branding.heroImageUrl || ''),
-      ctaPrimary: cleanText(branding.ctaPrimary || defaultButtonLabel(mode)),
-      ctaSecondary: cleanText(branding.ctaSecondary || 'Conhecer assinatura profissional'),
+      ctaPrimary: cleanText(branding.ctaPrimary || defaultButtonLabel(mode, segment)),
+      ctaSecondary: cleanText(branding.ctaSecondary || (isVenueSegment(segment) ? 'Conhecer o espaço' : 'Conhecer assinatura profissional')),
       tone: cleanText(branding.tone || 'premium, claro e autoral'),
       positioning: cleanText(branding.positioning || ''),
-      signatureTitle: cleanText(branding.signatureTitle || 'Assinatura profissional'),
-      signatureText: cleanText(branding.signatureText || 'Um atendimento conduzido com método, presença e atenção aos detalhes que tornam cada etapa mais clara e segura.'),
+      signatureTitle: cleanText(branding.signatureTitle || (isVenueSegment(segment) ? 'Experiência do espaço' : 'Assinatura profissional')),
+      signatureText: cleanText(branding.signatureText || (isVenueSegment(segment) ? 'Uma experiência pensada para receber pessoas com conforto, privacidade e uma reserva simples.' : 'Um atendimento conduzido com método, presença e atenção aos detalhes que tornam cada etapa mais clara e segura.')),
       signatureTags: normalizeStringArray(branding.signatureTags).slice(0, 4),
     },
     services: normalizeServices(raw.services, segment),
     conversion: {
       mode,
-      title: cleanText(conversion.title || defaultConversionCopy(mode).title),
-      subtitle: cleanText(conversion.subtitle || defaultConversionCopy(mode).subtitle),
-      buttonLabel: cleanText(conversion.buttonLabel || defaultConversionCopy(mode).buttonLabel),
-      successMessage: cleanText(conversion.successMessage || defaultConversionCopy(mode).successMessage),
+      title: cleanText(conversion.title || defaultConversionCopy(mode, segment).title),
+      subtitle: cleanText(conversion.subtitle || defaultConversionCopy(mode, segment).subtitle),
+      buttonLabel: cleanText(conversion.buttonLabel || defaultConversionCopy(mode, segment).buttonLabel),
+      successMessage: cleanText(conversion.successMessage || defaultConversionCopy(mode, segment).successMessage),
       showSchedule: mode === 'appointment' || Boolean(conversion.showSchedule),
       requestServiceTypes: normalizeStringArray(conversion.requestServiceTypes),
     },
@@ -79,8 +79,10 @@ export function normalizePersonaPayload(raw = {}) {
     },
     finalCta: {
       title: cleanText(finalCta.title || 'Pronto para dar o próximo passo?'),
-      subtitle: cleanText(finalCta.subtitle || `Fale com ${branding.professionalName || businessName} e comece com uma experiência profissional mais clara.`),
-      buttonLabel: cleanText(finalCta.buttonLabel || defaultButtonLabel(mode)),
+      subtitle: cleanText(finalCta.subtitle || (isVenueSegment(segment)
+        ? `Consulte a disponibilidade de ${branding.professionalName || businessName} e envie os detalhes da sua reserva.`
+        : `Fale com ${branding.professionalName || businessName} e comece com uma experiência profissional mais clara.`)),
+      buttonLabel: cleanText(finalCta.buttonLabel || defaultButtonLabel(mode, segment)),
     },
   };
 }
@@ -258,7 +260,16 @@ function normalizeConversionMode(mode, segment) {
   return 'lead';
 }
 
-function defaultConversionCopy(mode) {
+function defaultConversionCopy(mode, segment = '') {
+  if (mode === 'appointment' && isVenueSegment(segment)) {
+    return {
+      title: 'Escolha a data da reserva',
+      subtitle: 'Consulte disponibilidade para fim de semana, evento ou diária e envie os detalhes principais.',
+      buttonLabel: 'Solicitar reserva',
+      successMessage: 'Reserva solicitada com sucesso. Em breve enviaremos a confirmação.',
+    };
+  }
+
   const copies = {
     appointment: {
       title: 'Escolha uma data e horário disponível',
@@ -288,8 +299,8 @@ function defaultConversionCopy(mode) {
   return copies[mode] || copies.appointment;
 }
 
-function defaultButtonLabel(mode) {
-  return defaultConversionCopy(mode).buttonLabel;
+function defaultButtonLabel(mode, segment = '') {
+  return defaultConversionCopy(mode, segment).buttonLabel;
 }
 
 function suggestedServices(segment) {
@@ -300,6 +311,10 @@ function suggestedServices(segment) {
   if (/odonto|dent/.test(value)) return ['Avaliação inicial', 'Clareamento', 'Limpeza preventiva'];
   if (/estetic|beleza/.test(value)) return ['Avaliação estética', 'Protocolo personalizado', 'Acompanhamento premium'];
   return ['Avaliação inicial', 'Atendimento personalizado', 'Consultoria profissional'];
+}
+
+function isVenueSegment(segment) {
+  return /sitio|sítio|chacara|chácara|loca|alug|reserva|hosped|temporada|evento|salao|salão|quadra|estudio|estúdio/.test(String(segment).toLowerCase());
 }
 
 function cleanText(value) {

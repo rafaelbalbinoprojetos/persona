@@ -4,7 +4,7 @@ import { ArrowRight, CalendarDays, CheckCircle2, ImagePlus, Loader2, Play, Spark
 import { buttonClass, cardClass } from './theme.js';
 import { getNextAvailabilityLabel } from './dateUtils.js';
 import { getImageCandidates } from './imageUtils.js';
-import { getFeaturedProfessional, getSocialLinks } from './landingUtils.js';
+import { getFeaturedProfessional, getHeroMicrocopy, getSocialLinks } from './landingUtils.js';
 import { AnimatedMesh, AtmosphericParticles, cinematicEase, reveal, stagger } from './LandingShared.jsx';
 
 export function HeroModule({
@@ -23,6 +23,7 @@ export function HeroModule({
   const heroImageUrls = getImageCandidates(branding.hero_image_url);
   const nextAvailability = getNextAvailabilityLabel(availability);
   const socialLinks = getSocialLinks(config);
+  const heroCopy = getHeroMicrocopy(config);
 
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
@@ -83,7 +84,7 @@ export function HeroModule({
               </span>
             </motion.span>
             <motion.p variants={reveal} className="text-sm font-extrabold uppercase tracking-[0.28em] text-[var(--preview-primary)]">
-              Marca profissional premium
+              {heroCopy.eyebrow}
             </motion.p>
             <motion.h1
               variants={reveal}
@@ -127,7 +128,7 @@ export function HeroModule({
                 style={theme.buttonStyle === 'outline' ? undefined : { backgroundColor: theme.primary }}
               >
                 <CalendarDays size={19} />
-                Agendar agora
+                {heroCopy.primaryCta}
               </motion.a>
               <motion.a
                 href="#assinatura"
@@ -136,21 +137,21 @@ export function HeroModule({
                 className="pill-button border border-[var(--preview-border)] bg-[var(--preview-surface)]/70 text-[var(--preview-text)] shadow-sm backdrop-blur-xl hover:-translate-y-1"
               >
                 <Play size={18} fill="currentColor" />
-                Conhecer assinatura profissional
+                {heroCopy.secondaryCta}
               </motion.a>
             </motion.div>
           </motion.div>
         </div>
 
         <HeroFloatingCard
-          title="Presença verificada"
-          subtitle={`${services.length} experiências disponíveis`}
+          title={heroCopy.trustTitle}
+          subtitle={`${services.length} ${heroCopy.countLabel}`}
           Icon={CheckCircle2}
           className="right-6 top-28 lg:right-10 lg:top-32"
         />
         <HeroFloatingCard
           title={nextAvailability}
-          subtitle="Próxima disponibilidade"
+          subtitle={heroCopy.availabilitySubtitle}
           Icon={CalendarDays}
           className="bottom-8 right-6 md:bottom-16 lg:right-16"
           featured
@@ -158,6 +159,7 @@ export function HeroModule({
         <HeroSocialProofCard
           socialLinks={socialLinks}
           professional={professional}
+          title={heroCopy.socialTitle}
           className="bottom-8 left-6 lg:bottom-14 lg:left-16"
         />
       </div>
@@ -250,7 +252,7 @@ function HeroFloatingCard({ title, subtitle, Icon, className, featured = false }
   );
 }
 
-function HeroSocialProofCard({ socialLinks, professional, className }) {
+function HeroSocialProofCard({ socialLinks, professional, title, className }) {
   const primarySocial = socialLinks[0];
   if (!primarySocial) return null;
 
@@ -270,7 +272,7 @@ function HeroSocialProofCard({ socialLinks, professional, className }) {
           <primarySocial.Icon size={21} />
         </span>
         <div>
-          <p className="font-black text-[var(--preview-text)]">Presença digital ativa</p>
+          <p className="font-black text-[var(--preview-text)]">{title}</p>
           <p className="mt-1 text-sm font-semibold text-[var(--preview-muted)]">
             {primarySocial.handle || professional.name}
           </p>

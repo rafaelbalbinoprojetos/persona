@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import { cardClass } from './theme.js';
-import { getFeaturedProfessional, getSignaturePillars } from './landingUtils.js';
+import { getFeaturedProfessional, getSignatureIntroCopy, getSignaturePillars } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
 
 export function SignatureModule({ config, theme, editMode = false, onProfessionalTextChange }) {
   const professional = getFeaturedProfessional(config);
   const philosophy = professional.bio || config.preset.professionalBio;
   const pillars = getSignaturePillars(config.vertical);
+  const copy = getSignatureIntroCopy(config);
 
   return (
     <section id="assinatura" className="relative overflow-hidden bg-[var(--preview-section)] py-28">
@@ -22,10 +23,10 @@ export function SignatureModule({ config, theme, editMode = false, onProfessiona
         >
           <motion.div variants={reveal}>
             <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[var(--preview-primary)]">
-              Assinatura profissional
+              {copy.eyebrow}
             </p>
             <h2 className="mt-5 max-w-3xl text-4xl font-black leading-tight tracking-[-0.035em] sm:text-5xl lg:text-6xl">
-              Uma forma própria de atender, orientar e transformar.
+              {copy.title}
             </h2>
           </motion.div>
 

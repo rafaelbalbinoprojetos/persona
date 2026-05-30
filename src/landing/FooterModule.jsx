@@ -1,16 +1,17 @@
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
-import { getFeaturedProfessional, getSocialLinks } from './landingUtils.js';
+import { getFeaturedProfessional, getFooterCopy, getSocialLinks } from './landingUtils.js';
 
 export function FooterModule({ config, theme }) {
-  const { business, services, preset } = config;
+  const { business, services } = config;
   const professional = getFeaturedProfessional(config);
   const socialLinks = getSocialLinks(config);
+  const copy = getFooterCopy(config);
 
   const navItems = [
-    { label: 'Experiências', href: '#servicos' },
+    { label: copy.exploreServicesLabel, href: '#servicos' },
     { label: 'Galeria', href: '#galeria' },
-    { label: 'Agenda', href: '#agenda' },
+    { label: config.preset.sectionLabels.schedule, href: '#agenda' },
     { label: 'Depoimentos', href: '#depoimentos' },
   ];
 
@@ -33,8 +34,7 @@ export function FooterModule({ config, theme }) {
               <span className="text-xl font-black">{professional.name || business.name}</span>
             </a>
             <p className="mt-6 max-w-sm text-base font-semibold leading-8 text-[var(--preview-muted)]">
-              {preset.label} com presença digital premium, experiência autoral e agenda
-              inteligente.
+              {copy.description}
             </p>
             {socialLinks.length > 0 && (
               <div className="mt-7 flex flex-wrap gap-3">
@@ -48,7 +48,7 @@ export function FooterModule({ config, theme }) {
           {/* ── Colunas de navegação ── */}
           <FooterColumn title="Explorar" items={navItems} />
           <FooterColumn
-            title="Experiências"
+            title={copy.servicesTitle}
             items={(services || []).slice(0, 4).map((service) => ({
               label: service.name,
               href: '#servicos',
@@ -63,7 +63,7 @@ export function FooterModule({ config, theme }) {
             <div className="mt-5 space-y-3 text-sm font-semibold leading-7 text-[var(--preview-muted)]">
               {business.whatsapp && <p>{business.whatsapp}</p>}
               {business.email && <p>{business.email}</p>}
-              <p>Presença digital premium para profissionais.</p>
+              <p>{copy.contactFallback}</p>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { getImageCandidates } from './imageUtils.js';
-import { getFeaturedProfessional, getSocialLinks } from './landingUtils.js';
+import { getFeaturedProfessional, getSocialLinks, isVenueVertical } from './landingUtils.js';
 import { reveal } from './LandingShared.jsx';
 
 export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaTextChange }) {
@@ -9,11 +9,14 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
   const imageSources = getImageCandidates(professional.photo_url || config.branding.hero_image_url);
   const socialLinks = getSocialLinks(config);
   const primarySocial = socialLinks[0];
-  const defaultSubtitle = `Agende uma avaliação com ${professional.name || config.business.name} e tenha uma experiência conduzida com clareza, cuidado e presença profissional.`;
+  const isVenue = isVenueVertical(config.vertical);
+  const defaultSubtitle = isVenue
+    ? `Consulte a disponibilidade de ${professional.name || config.business.name} e envie os detalhes da sua reserva.`
+    : `Agende uma avaliação com ${professional.name || config.business.name} e tenha uma experiência conduzida com clareza, cuidado e presença profissional.`;
   const finalCta = {
-    title: config.finalCta?.title || 'Pronto para começar sua transformação?',
+    title: config.finalCta?.title || (isVenue ? 'Pronto para reservar sua data?' : 'Pronto para começar sua transformação?'),
     subtitle: config.finalCta?.subtitle || defaultSubtitle,
-    buttonLabel: config.finalCta?.buttonLabel || 'Agendar avaliação',
+    buttonLabel: config.finalCta?.buttonLabel || (isVenue ? 'Solicitar reserva' : 'Agendar avaliação'),
   };
 
   return (

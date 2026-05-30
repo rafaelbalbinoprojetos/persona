@@ -194,7 +194,7 @@ function buildFallbackConfig(prompt) {
     ],
     conversion: {
       mode,
-      title: defaultConversionTitle(mode),
+      title: isRental ? 'Escolha a data da reserva' : defaultConversionTitle(mode),
       subtitle: isRental ? 'Envie a data desejada e detalhes da reserva para confirmarmos disponibilidade.' : 'Envie suas informações para que o profissional avalie o melhor próximo passo.',
       buttonLabel: isRental ? 'Solicitar reserva' : defaultButton(mode),
       successMessage: 'Solicitação enviada com sucesso. Em breve entraremos em contato.',

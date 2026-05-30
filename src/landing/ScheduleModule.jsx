@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Mail, MapPin, Phone, Sparkles, UserRound } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
+import { getScheduleCopy } from './landingUtils.js';
 import {
   buildCalendarDays,
   dateFormatter,
@@ -21,6 +22,7 @@ import { SectionIntro } from './LandingShared.jsx';
 
 export function ScheduleModule({ config, theme }) {
   const { submission, business, location, availability, availabilityBreaks, availabilityDateBlocks, preset } = config;
+  const copy = getScheduleCopy(config);
   const today = useMemo(() => startOfDay(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(today);
@@ -124,15 +126,15 @@ export function ScheduleModule({ config, theme }) {
   async function handleRequestAppointment() {
     if (!canRequestAppointment) {
       setAppointmentStatus('error');
-      if (!selectedRule) setAppointmentMessage('Escolha uma data com atendimento disponível.');
-      else if (selectedDateBlock) setAppointmentMessage('Esta data está bloqueada para atendimento.');
+      if (!selectedRule) setAppointmentMessage(copy.noRuleMessage);
+      else if (selectedDateBlock) setAppointmentMessage(copy.blockedMessage);
       else if (!selectedTime) setAppointmentMessage('Escolha um horário disponível.');
       else if (bookedTimes.has(normalizeTime(selectedTime)))
         setAppointmentMessage('Este horário acabou de ser ocupado. Escolha outro horário disponível.');
       else if (customerName.trim().length < 3) setAppointmentMessage('Informe seu nome completo.');
       else if (customerWhatsAppDigits.length < 10)
         setAppointmentMessage('Informe um WhatsApp válido com DDD.');
-      else setAppointmentMessage('Revise os dados para solicitar o agendamento.');
+      else setAppointmentMessage(copy.invalidFallback);
       return;
     }
 
@@ -180,7 +182,7 @@ export function ScheduleModule({ config, theme }) {
       { submission_slug: submission.slug, appointment_date: selectedDateKey, start_time: selectedTime },
     ]);
     setAppointmentStatus('success');
-    setAppointmentMessage('Agendamento solicitado com sucesso. Em breve enviaremos a confirmação.');
+    setAppointmentMessage(copy.successMessage);
   }
 
   return (
@@ -189,8 +191,8 @@ export function ScheduleModule({ config, theme }) {
         <div>
           <SectionIntro
             eyebrow={preset.sectionLabels.schedule}
-            title="Escolha uma data e horário disponível"
-            description="O calendário respeita horários, pausas, bloqueios e agendamentos já cadastrados."
+            title={config.conversion?.title || copy.title}
+            description={config.conversion?.subtitle || copy.description}
             align="left"
           />
           <div className="mt-8 space-y-4 text-[var(--preview-muted)]">
@@ -300,13 +302,13 @@ export function ScheduleModule({ config, theme }) {
                   ? 'Data bloqueada'
                   : selectedRule
                     ? `${selectedRule.start_time} às ${selectedRule.end_time}`
-                    : 'Sem atendimento'}
+                    : copy.unavailable}
               </p>
             </div>
 
             {selectedDateBlock ? (
               <p className="rounded-2xl bg-[var(--preview-surface)] p-4 text-sm font-bold text-[var(--preview-muted)]">
-                {selectedDateBlock.reason || 'Não haverá atendimento nesta data.'}
+                {selectedDateBlock.reason || copy.noServiceDate}
               </p>
             ) : selectedTimes.length ? (
               <div className="grid max-h-56 grid-cols-3 gap-3 overflow-y-auto pr-1 sm:grid-cols-4">
@@ -339,7 +341,7 @@ export function ScheduleModule({ config, theme }) {
               </div>
             ) : (
               <p className="rounded-2xl bg-[var(--preview-surface)] p-4 text-sm font-bold text-[var(--preview-muted)]">
-                Nenhum horário configurado para este dia.
+                {copy.noTimes}
               </p>
             )}
 
@@ -386,9 +388,9 @@ export function ScheduleModule({ config, theme }) {
             <div className="sm:col-span-2">
               <ScheduleInput
                 icon={<Sparkles size={16} />}
-                label="Motivo do agendamento"
+                label={copy.reasonLabel}
                 value={appointmentReason}
-                placeholder="Ex: avaliação, retorno, consulta inicial"
+                placeholder={copy.reasonPlaceholder}
                 onChange={(value) => {
                   clearFeedback();
                   setAppointmentReason(value);
@@ -421,8 +423,8 @@ export function ScheduleModule({ config, theme }) {
             }
           >
             {appointmentStatus === 'saving'
-              ? 'Cadastrando agendamento…'
-              : `Solicitar agendamento${selectedTime ? ` às ${selectedTime}` : ''}`}
+              ? copy.savingLabel
+              : `${config.conversion?.buttonLabel || copy.buttonLabel}${selectedTime ? ` às ${selectedTime}` : ''}`}
           </button>
         </div>
       </div>

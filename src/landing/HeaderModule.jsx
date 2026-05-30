@@ -4,7 +4,7 @@ import { buttonClass } from './theme.js';
 export function HeaderModule({ config, theme, onOpenSettings, onSignOut, canEdit = false }) {
   const { business, preset, conversion } = config;
   const Icon = preset.Icon || Sparkles;
-  const conversionLabel = getConversionLabel(conversion?.mode);
+  const conversionLabel = conversion?.mode === 'appointment' ? preset.sectionLabels.schedule : getConversionLabel(conversion?.mode);
   const ctaLabel = conversion?.buttonLabel || conversionLabel;
 
   return (
