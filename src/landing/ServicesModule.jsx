@@ -46,6 +46,7 @@ export function ServicesModule({
           {services.map((service, index) => (
             <motion.article
               key={index}
+              data-service-index={index}
               variants={reveal}
               whileHover={{ y: -10, scale: 1.01 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}

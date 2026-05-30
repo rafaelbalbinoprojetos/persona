@@ -224,8 +224,14 @@ function PreviewLanding({ submission }) {
   }
 
   async function addVisualService() {
-    const nextSubmission = withNewService(localSubmission);
+    const nextSubmission = withNewService(localSubmission, config.services);
+    const newServiceIndex = (nextSubmission.payload.services || []).length - 1;
     setLocalSubmission(nextSubmission);
+    window.setTimeout(() => {
+      document
+        .querySelector(`[data-service-index="${newServiceIndex}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
     await saveSubmission(nextSubmission, 'Novo serviço criado.');
   }
 
@@ -388,9 +394,11 @@ function withServiceField(submission, index, field, value, fallbackServices = []
   };
 }
 
-function withNewService(submission) {
+function withNewService(submission, fallbackServices = []) {
   const payload = submission.payload || {};
-  const services = Array.isArray(payload.services) ? payload.services : [];
+  const services = Array.isArray(payload.services) && payload.services.length
+    ? payload.services
+    : fallbackServices;
 
   return {
     ...submission,
