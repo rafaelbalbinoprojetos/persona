@@ -235,6 +235,18 @@ function PreviewLanding({ submission }) {
     await saveSubmission(nextSubmission, 'Novo serviço criado.');
   }
 
+  async function removeVisualService(index) {
+    if (!window.confirm('Excluir este serviço? Esta ação também removerá a imagem dele do Storage.')) return;
+
+    const previousImageUrl = getServiceImageUrl(localSubmission, index, config.services);
+    const nextSubmission = withoutService(localSubmission, index, config.services);
+    setLocalSubmission(nextSubmission);
+    const saved = await saveSubmission(nextSubmission, 'Serviço excluído.');
+    if (saved) {
+      await removePreviousLandingAsset(previousImageUrl, '', session.user.id);
+    }
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     window.location.href = '/';
@@ -277,6 +289,7 @@ function PreviewLanding({ submission }) {
             onServiceTextChange={updateServiceText}
             onServiceImageUpload={uploadServiceImage}
             onAddService={addVisualService}
+            onRemoveService={removeVisualService}
           />
         )}
         {modules.services && (
@@ -414,6 +427,21 @@ function withNewService(submission, fallbackServices = []) {
           image_url: '',
         },
       ],
+    },
+  };
+}
+
+function withoutService(submission, index, fallbackServices = []) {
+  const payload = submission.payload || {};
+  const services = Array.isArray(payload.services) && payload.services.length
+    ? payload.services
+    : fallbackServices;
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      services: services.filter((_, itemIndex) => itemIndex !== index),
     },
   };
 }

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ImagePlus, Plus, Sparkles } from 'lucide-react';
+import { ImagePlus, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
 import { getServiceEmotionalLine } from './landingUtils.js';
@@ -13,6 +13,7 @@ export function ServicesModule({
   onServiceTextChange,
   onServiceImageUpload,
   onAddService,
+  onRemoveService,
 }) {
   const { services, preset } = config;
 
@@ -52,9 +53,20 @@ export function ServicesModule({
               animate="visible"
               whileHover={{ y: -10, scale: 1.01 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className={cardClass(theme, 'group overflow-hidden shadow-[var(--preview-shadow)]')}
+              className={cardClass(theme, 'group relative overflow-hidden shadow-[var(--preview-shadow)]')}
               style={{ borderRadius: theme.radius }}
             >
+              {editMode && (
+                <button
+                  type="button"
+                  onClick={() => onRemoveService?.(index)}
+                  className="absolute left-4 top-4 z-30 inline-flex h-10 items-center justify-center gap-2 rounded-full border border-red-200/70 bg-red-600/90 px-3 text-xs font-extrabold text-white shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-red-700"
+                  aria-label="Excluir serviço"
+                >
+                  <Trash2 size={15} />
+                  Excluir
+                </button>
+              )}
               <ServiceImage
                 src={service.image_url}
                 alt={service.name}
