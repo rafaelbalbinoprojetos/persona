@@ -157,6 +157,13 @@ function PreviewLanding({ submission }) {
     await saveSubmission(nextSubmission);
   }
 
+  async function updateGalleryText(index, field, value) {
+    const cleanValue = String(value || '').trim();
+    const nextSubmission = withGalleryField(localSubmission, index, field, cleanValue, config.gallery);
+    setLocalSubmission(nextSubmission);
+    await saveSubmission(nextSubmission);
+  }
+
   async function updateFinalCtaText(field, value) {
     const cleanValue = String(value || '').trim();
     if (!cleanValue) return;
@@ -223,6 +230,19 @@ function PreviewLanding({ submission }) {
     }
   }
 
+  async function uploadGalleryImage(index, file) {
+    const previousImageUrl = getGalleryImageUrl(localSubmission, index, config.gallery);
+    const publicUrl = await uploadLandingImage(file, `gallery-${index + 1}`);
+    if (!publicUrl) return;
+
+    const nextSubmission = withGalleryField(localSubmission, index, 'image_url', publicUrl, config.gallery);
+    setLocalSubmission(nextSubmission);
+    const saved = await saveSubmission(nextSubmission, 'Imagem da galeria atualizada.');
+    if (saved) {
+      await removePreviousLandingAsset(previousImageUrl, publicUrl, session.user.id);
+    }
+  }
+
   async function addVisualService() {
     const nextSubmission = withNewService(localSubmission, config.services);
     const newServiceIndex = (nextSubmission.payload.services || []).length - 1;
@@ -242,6 +262,18 @@ function PreviewLanding({ submission }) {
     const nextSubmission = withoutService(localSubmission, index, config.services);
     setLocalSubmission(nextSubmission);
     const saved = await saveSubmission(nextSubmission, 'Serviço excluído.');
+    if (saved) {
+      await removePreviousLandingAsset(previousImageUrl, '', session.user.id);
+    }
+  }
+
+  async function removeGalleryItem(index) {
+    if (!window.confirm('Excluir esta imagem da galeria? Esta ação também removerá o arquivo do Storage.')) return;
+
+    const previousImageUrl = getGalleryImageUrl(localSubmission, index, config.gallery);
+    const nextSubmission = withoutGalleryItem(localSubmission, index, config.gallery);
+    setLocalSubmission(nextSubmission);
+    const saved = await saveSubmission(nextSubmission, 'Imagem da galeria excluída.');
     if (saved) {
       await removePreviousLandingAsset(previousImageUrl, '', session.user.id);
     }
@@ -300,7 +332,16 @@ function PreviewLanding({ submission }) {
             onProfessionalTextChange={updatePrimaryProfessionalText}
           />
         )}
-        {modules.gallery && <GalleryModule config={config} theme={config.theme} />}
+        {modules.gallery && (
+          <GalleryModule
+            config={config}
+            theme={config.theme}
+            editMode={canEdit}
+            onGalleryTextChange={updateGalleryText}
+            onGalleryImageUpload={uploadGalleryImage}
+            onRemoveGalleryItem={removeGalleryItem}
+          />
+        )}
         {modules.schedule && <ConversionModule config={config} theme={config.theme} />}
         {modules.testimonials && <TestimonialsModule config={config} theme={config.theme} />}
         {modules.faq && <FAQModule config={config} theme={config.theme} />}
@@ -345,6 +386,13 @@ function getServiceImageUrl(submission, index, fallbackServices = []) {
     ? submission.payload.services
     : fallbackServices;
   return services[index]?.image_url || '';
+}
+
+function getGalleryImageUrl(submission, index, fallbackGallery = []) {
+  const gallery = Array.isArray(submission.payload?.gallery) && submission.payload.gallery.length
+    ? submission.payload.gallery
+    : fallbackGallery;
+  return gallery[index]?.image_url || gallery[index]?.url || '';
 }
 
 async function removePreviousLandingAsset(previousUrl, nextUrl, userId) {
@@ -407,6 +455,28 @@ function withServiceField(submission, index, field, value, fallbackServices = []
   };
 }
 
+function withGalleryField(submission, index, field, value, fallbackGallery = []) {
+  const payload = submission.payload || {};
+  const gallery = Array.isArray(payload.gallery) && payload.gallery.length
+    ? payload.gallery
+    : normalizeEditableGallery(fallbackGallery);
+  const nextGallery = ensureGallerySlot(gallery, index).map((item, itemIndex) =>
+    itemIndex === index ? { ...item, [field]: value } : item,
+  );
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      enabledModules: {
+        ...payload.enabledModules,
+        gallery: true,
+      },
+      gallery: nextGallery,
+    },
+  };
+}
+
 function withNewService(submission, fallbackServices = []) {
   const payload = submission.payload || {};
   const services = Array.isArray(payload.services) && payload.services.length
@@ -431,6 +501,21 @@ function withNewService(submission, fallbackServices = []) {
   };
 }
 
+function withoutGalleryItem(submission, index, fallbackGallery = []) {
+  const payload = submission.payload || {};
+  const gallery = Array.isArray(payload.gallery) && payload.gallery.length
+    ? payload.gallery
+    : normalizeEditableGallery(fallbackGallery);
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      gallery: gallery.filter((_, itemIndex) => itemIndex !== index),
+    },
+  };
+}
+
 function withoutService(submission, index, fallbackServices = []) {
   const payload = submission.payload || {};
   const services = Array.isArray(payload.services) && payload.services.length
@@ -444,6 +529,26 @@ function withoutService(submission, index, fallbackServices = []) {
       services: services.filter((_, itemIndex) => itemIndex !== index),
     },
   };
+}
+
+function normalizeEditableGallery(items = []) {
+  return (Array.isArray(items) ? items : []).map((item) => ({
+    title: item.title || '',
+    description: item.description || '',
+    image_url: item.image_url || item.url || '',
+  }));
+}
+
+function ensureGallerySlot(gallery, index) {
+  const nextGallery = [...gallery];
+  while (nextGallery.length <= index) {
+    nextGallery.push({
+      title: '',
+      description: '',
+      image_url: '',
+    });
+  }
+  return nextGallery;
 }
 
 function withFinalCtaField(submission, field, value) {
