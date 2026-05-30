@@ -223,6 +223,12 @@ function PreviewLanding({ submission }) {
     }
   }
 
+  async function addVisualService() {
+    const nextSubmission = withNewService(localSubmission);
+    setLocalSubmission(nextSubmission);
+    await saveSubmission(nextSubmission, 'Novo serviço criado.');
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     window.location.href = '/';
@@ -264,6 +270,7 @@ function PreviewLanding({ submission }) {
             editMode={canEdit}
             onServiceTextChange={updateServiceText}
             onServiceImageUpload={uploadServiceImage}
+            onAddService={addVisualService}
           />
         )}
         {modules.services && (
@@ -377,6 +384,28 @@ function withServiceField(submission, index, field, value, fallbackServices = []
       services: currentServices.map((service, itemIndex) =>
         itemIndex === index ? { ...service, [field]: value } : service,
       ),
+    },
+  };
+}
+
+function withNewService(submission) {
+  const payload = submission.payload || {};
+  const services = Array.isArray(payload.services) ? payload.services : [];
+
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      services: [
+        ...services,
+        {
+          name: 'Novo serviço',
+          description: 'Descreva este serviço diretamente aqui.',
+          duration: 30,
+          price: '',
+          image_url: '',
+        },
+      ],
     },
   };
 }

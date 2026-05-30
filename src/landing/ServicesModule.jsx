@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ImagePlus, Sparkles } from 'lucide-react';
+import { ImagePlus, Plus, Sparkles } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
 import { getServiceEmotionalLine } from './landingUtils.js';
@@ -12,6 +12,7 @@ export function ServicesModule({
   editMode = false,
   onServiceTextChange,
   onServiceImageUpload,
+  onAddService,
 }) {
   const { services, preset } = config;
 
@@ -23,6 +24,18 @@ export function ServicesModule({
           title="Experiências desenhadas com intenção"
           description="Serviços apresentados como uma assinatura profissional: claros, desejáveis e alinhados a uma presença premium."
         />
+        {editMode && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={onAddService}
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-[var(--preview-border)] bg-[var(--preview-card)] px-5 text-sm font-extrabold text-[var(--preview-text)] shadow-[var(--preview-shadow)] transition hover:-translate-y-0.5 hover:text-[var(--preview-primary)]"
+            >
+              <Plus size={18} />
+              Novo serviço
+            </button>
+          </div>
+        )}
         <motion.div
           className="mt-14 grid gap-7 md:grid-cols-2 xl:grid-cols-3"
           variants={stagger}
