@@ -48,6 +48,8 @@ export function ServicesModule({
               key={index}
               data-service-index={index}
               variants={reveal}
+              initial="hidden"
+              animate="visible"
               whileHover={{ y: -10, scale: 1.01 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className={cardClass(theme, 'group overflow-hidden shadow-[var(--preview-shadow)]')}
