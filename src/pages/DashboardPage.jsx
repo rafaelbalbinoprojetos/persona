@@ -3,14 +3,17 @@ import {
   ArrowUpRight,
   BarChart3,
   CalendarCheck,
+  Edit3,
   Image,
   LayoutDashboard,
   LogOut,
   Palette,
+  Plus,
   Save,
   Settings,
   Sparkles,
   Star,
+  Trash2,
 } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { buildPageConfigFromOnboarding } from '../landing/pageConfig.js';
@@ -118,7 +121,7 @@ export default function DashboardPage() {
 
     setSubmissions(data || []);
     setSelectedId((current) => {
-      if (current) return current;
+      if (current && data?.some((item) => item.id === current)) return current;
       const matchBySlug = data?.find((item) => item.slug === initialSlug);
       return matchBySlug?.id || data?.[0]?.id || '';
     });
@@ -559,6 +562,35 @@ export default function DashboardPage() {
     await loadSubmissions();
   }
 
+  async function deleteCurrentPage(page) {
+    if (!page?.id) return;
+    const name = page.payload?.businesses?.name || page.business_name || page.slug;
+    if (!window.confirm(`Excluir a página "${name}"? Esta ação não pode ser desfeita.`)) return;
+
+    setStatus({ type: 'saving', message: 'Excluindo página...' });
+    const { data: userData } = await supabase.auth.getUser();
+    const userId = userData?.user?.id;
+
+    const { error } = await supabase
+      .from('onboarding_submissions')
+      .delete()
+      .eq('id', page.id);
+
+    if (error) {
+      setStatus({ type: 'error', message: error.message });
+      return;
+    }
+
+    if (userId && page.slug) {
+      await removeStorageFolder(`${userId}/${page.slug}`);
+    }
+
+    setStatus({ type: 'success', message: 'Página excluída.' });
+    setDraft(null);
+    setSelectedId('');
+    await loadSubmissions();
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     window.location.reload();
@@ -611,7 +643,87 @@ export default function DashboardPage() {
       </header>
 
       <main className="mx-auto grid w-full max-w-[1680px] gap-6 px-4 py-8 sm:px-6 lg:px-8">
+        <section className="rounded-[2rem] border border-[var(--preview-border)] bg-[var(--preview-surface,#fff)] p-5 shadow-[var(--preview-shadow)] sm:p-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-extrabold uppercase text-[var(--preview-primary)]">Suas páginas</p>
+              <h1 className="mt-2 text-2xl font-black tracking-[-0.02em]">Gerencie suas páginas criadas</h1>
+              <p className="mt-2 text-sm font-semibold text-[var(--preview-muted)]">
+                Abra uma página existente, continue editando ou crie uma nova presença com IA.
+              </p>
+            </div>
+            <a href="/onboarding?new=1" className="pill-button bg-[var(--preview-primary,#1c8dff)] text-white shadow-[var(--preview-glow)]">
+              <Plus size={18} />
+              Nova página
+            </a>
+          </div>
+
+          {submissions.length ? (
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {submissions.map((item) => {
+                const selected = item.id === selectedId;
+                const pageName = item.payload?.businesses?.name || item.business_name;
+                return (
+                  <article
+                    key={item.id}
+                    className={`rounded-[1.5rem] border p-4 transition ${
+                      selected
+                        ? 'border-[var(--preview-primary)] bg-[var(--preview-card)] shadow-[var(--preview-shadow)]'
+                        : 'border-[var(--preview-border)] bg-[var(--preview-card)]/70 hover:border-[var(--preview-primary)]/40'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-lg font-black">{pageName}</p>
+                        <p className="mt-1 truncate text-sm font-bold text-[var(--preview-muted)]">/{item.slug}</p>
+                        <span className="mt-3 inline-flex rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 py-1 text-xs font-extrabold text-[var(--preview-muted)]">
+                          {item.status}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => deleteCurrentPage(item)}
+                        className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-600 hover:text-white"
+                        aria-label="Excluir página"
+                      >
+                        <Trash2 size={17} />
+                      </button>
+                    </div>
+                    <div className="mt-5 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedId(item.id)}
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 text-sm font-extrabold text-[var(--preview-text)] transition hover:text-[var(--preview-primary)]"
+                      >
+                        <Edit3 size={16} />
+                        Editar
+                      </button>
+                      <a
+                        href={`/preview/${item.slug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[var(--preview-primary)] px-3 text-sm font-extrabold text-white shadow-[var(--preview-glow)]"
+                      >
+                        Abrir
+                        <ArrowUpRight size={16} />
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-6 rounded-[1.5rem] border border-dashed border-[var(--preview-border)] bg-[var(--preview-card)] p-8 text-center">
+              <p className="text-lg font-black">Você ainda não tem páginas criadas.</p>
+              <p className="mt-2 text-sm font-semibold text-[var(--preview-muted)]">
+                Crie sua primeira página com IA para começar a editar e publicar.
+              </p>
+            </div>
+          )}
+        </section>
+
         {/* Seletor de cliente + abas */}
+        {submissions.length > 0 && (
         <section className="rounded-[2rem] border border-[var(--preview-border)] bg-[var(--preview-surface,#fff)] p-4 shadow-[var(--preview-shadow)]">
           <div className="grid gap-4 xl:grid-cols-[minmax(280px,420px)_1fr] xl:items-center">
             <div>
@@ -646,6 +758,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* Conteúdo da aba ativa */}
         <section className="rounded-[2rem] border border-[var(--preview-border)] bg-[var(--preview-surface,#fff)] p-5 shadow-[var(--preview-shadow)] sm:p-8">
@@ -813,4 +926,19 @@ function normalizeGalleryPayload(items) {
     description: item.description || item.alt_text || '',
     image_url: item.image_url || item.url || item.photo_url || '',
   }));
+}
+
+async function removeStorageFolder(prefix) {
+  if (!prefix) return;
+
+  const { data, error } = await supabase.storage.from('landing-assets').list(prefix, { limit: 100 });
+  if (error || !data?.length) return;
+
+  const paths = data
+    .filter((item) => item.name)
+    .map((item) => `${prefix}/${item.name}`);
+
+  if (paths.length) {
+    await supabase.storage.from('landing-assets').remove(paths);
+  }
 }
