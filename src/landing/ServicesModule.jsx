@@ -1,12 +1,18 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { ImagePlus, Sparkles } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
 import { getServiceEmotionalLine } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
 
-export function ServicesModule({ config, theme, editMode = false, onServiceTextChange }) {
+export function ServicesModule({
+  config,
+  theme,
+  editMode = false,
+  onServiceTextChange,
+  onServiceImageUpload,
+}) {
   const { services, preset } = config;
 
   return (
@@ -33,7 +39,14 @@ export function ServicesModule({ config, theme, editMode = false, onServiceTextC
               className={cardClass(theme, 'group overflow-hidden shadow-[var(--preview-shadow)]')}
               style={{ borderRadius: theme.radius }}
             >
-              <ServiceImage src={service.image_url} alt={service.name} theme={theme} large />
+              <ServiceImage
+                src={service.image_url}
+                alt={service.name}
+                theme={theme}
+                large
+                editMode={editMode}
+                onImageUpload={(file) => onServiceImageUpload?.(index, file)}
+              />
               <div className="p-8">
                 <div className="mb-5 flex items-center justify-between gap-4">
                   <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--preview-primary)]">
@@ -82,7 +95,7 @@ export function ServicesModule({ config, theme, editMode = false, onServiceTextC
 
 // ─── Sub-componente ───────────────────────────────────────────────────────────
 
-function ServiceImage({ src, alt, theme, large = false }) {
+function ServiceImage({ src, alt, theme, large = false, editMode = false, onImageUpload }) {
   const [failed, setFailed] = useState(false);
   const [sourceIndex, setSourceIndex] = useState(0);
   const sources = useMemo(() => getImageCandidates(src), [src]);
@@ -91,7 +104,8 @@ function ServiceImage({ src, alt, theme, large = false }) {
 
   if (unsupportedReason || !sources.length || failed) {
     return (
-      <div className={`grid ${height} place-items-center bg-[var(--preview-card)] text-center text-[var(--preview-primary)]`}>
+      <div className={`relative grid ${height} place-items-center bg-[var(--preview-card)] text-center text-[var(--preview-primary)]`}>
+        {editMode && <ServiceImageUploadButton onImageUpload={onImageUpload} />}
         <div>
           <Sparkles size={42} className="mx-auto" />
           <p className="mt-3 px-6 text-sm font-bold text-[var(--preview-muted)]">
@@ -104,9 +118,10 @@ function ServiceImage({ src, alt, theme, large = false }) {
 
   return (
     <div
-      className={`${height} overflow-hidden`}
+      className={`relative ${height} overflow-hidden`}
       style={{ borderTopLeftRadius: theme.radius, borderTopRightRadius: theme.radius }}
     >
+      {editMode && <ServiceImageUploadButton onImageUpload={onImageUpload} />}
       <img
         src={sources[sourceIndex]}
         alt={alt}
@@ -117,5 +132,24 @@ function ServiceImage({ src, alt, theme, large = false }) {
         }}
       />
     </div>
+  );
+}
+
+function ServiceImageUploadButton({ onImageUpload }) {
+  return (
+    <label className="absolute right-4 top-4 z-20 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/25 bg-black/50 px-3 text-xs font-extrabold text-white shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-black/65">
+      <ImagePlus size={16} />
+      Trocar
+      <input
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) onImageUpload?.(file);
+          event.target.value = '';
+        }}
+      />
+    </label>
   );
 }

@@ -165,21 +165,20 @@ function PreviewLanding({ submission }) {
     await saveSubmission(nextSubmission);
   }
 
-  async function uploadHeroImage(file) {
+  async function uploadLandingImage(file, pathPrefix) {
     if (!file || !session?.user?.id) return;
     if (!file.type.startsWith('image/')) {
       setEditStatus({ type: 'error', message: 'Escolha um arquivo de imagem.' });
-      return;
+      return null;
     }
     if (file.size > 5 * 1024 * 1024) {
       setEditStatus({ type: 'error', message: 'Use uma imagem com até 5 MB.' });
-      return;
+      return null;
     }
 
     setEditStatus({ type: 'saving', message: 'Enviando imagem...' });
-    const previousImageUrl = getCurrentHeroImageUrl(localSubmission);
     const extension = getFileExtension(file);
-    const path = `${session.user.id}/${localSubmission.slug}/hero-${Date.now()}.${extension}`;
+    const path = `${session.user.id}/${localSubmission.slug}/${pathPrefix}-${Date.now()}.${extension}`;
     const { error: uploadError } = await supabase.storage
       .from('landing-assets')
       .upload(path, file, { cacheControl: '3600', upsert: true });
@@ -191,14 +190,34 @@ function PreviewLanding({ submission }) {
           ? 'Bucket landing-assets não encontrado. Execute o SQL de storage no Supabase.'
           : uploadError.message,
       });
-      return;
+      return null;
     }
 
     const { data } = supabase.storage.from('landing-assets').getPublicUrl(path);
-    const publicUrl = data.publicUrl;
+    return data.publicUrl;
+  }
+
+  async function uploadHeroImage(file) {
+    const previousImageUrl = getCurrentHeroImageUrl(localSubmission);
+    const publicUrl = await uploadLandingImage(file, 'hero');
+    if (!publicUrl) return;
+
     const nextSubmission = withBrandingField(localSubmission, 'hero_image_url', publicUrl);
     setLocalSubmission(nextSubmission);
     const saved = await saveSubmission(nextSubmission, 'Imagem atualizada.');
+    if (saved) {
+      await removePreviousLandingAsset(previousImageUrl, publicUrl, session.user.id);
+    }
+  }
+
+  async function uploadServiceImage(index, file) {
+    const previousImageUrl = getServiceImageUrl(localSubmission, index, config.services);
+    const publicUrl = await uploadLandingImage(file, `service-${index + 1}`);
+    if (!publicUrl) return;
+
+    const nextSubmission = withServiceField(localSubmission, index, 'image_url', publicUrl, config.services);
+    setLocalSubmission(nextSubmission);
+    const saved = await saveSubmission(nextSubmission, 'Imagem do serviço atualizada.');
     if (saved) {
       await removePreviousLandingAsset(previousImageUrl, publicUrl, session.user.id);
     }
@@ -244,6 +263,7 @@ function PreviewLanding({ submission }) {
             theme={config.theme}
             editMode={canEdit}
             onServiceTextChange={updateServiceText}
+            onServiceImageUpload={uploadServiceImage}
           />
         )}
         {modules.services && (
@@ -292,6 +312,13 @@ function withBrandingField(submission, field, value) {
 
 function getCurrentHeroImageUrl(submission) {
   return submission.payload?.business_branding?.hero_image_url || submission.hero_image_url || '';
+}
+
+function getServiceImageUrl(submission, index, fallbackServices = []) {
+  const services = Array.isArray(submission.payload?.services) && submission.payload.services.length
+    ? submission.payload.services
+    : fallbackServices;
+  return services[index]?.image_url || '';
 }
 
 async function removePreviousLandingAsset(previousUrl, nextUrl, userId) {
