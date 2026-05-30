@@ -1,13 +1,20 @@
 import { useState, useMemo } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { ArrowRight, CalendarDays, CheckCircle2, Play, Sparkles } from 'lucide-react';
+import { ArrowRight, CalendarDays, CheckCircle2, ImagePlus, Loader2, Play, Sparkles } from 'lucide-react';
 import { buttonClass, cardClass } from './theme.js';
 import { getNextAvailabilityLabel } from './dateUtils.js';
 import { getImageCandidates } from './imageUtils.js';
 import { getFeaturedProfessional, getSocialLinks } from './landingUtils.js';
 import { AnimatedMesh, AtmosphericParticles, cinematicEase, reveal, stagger } from './LandingShared.jsx';
 
-export function HeroModule({ config, theme }) {
+export function HeroModule({
+  config,
+  theme,
+  editMode = false,
+  editStatus,
+  onHeroTextChange,
+  onHeroImageUpload,
+}) {
   const { business, branding, preset, services, availability } = config;
   const professional = getFeaturedProfessional(config);
   const professionalName = professional.name || business.name;
@@ -41,6 +48,12 @@ export function HeroModule({ config, theme }) {
         onMouseLeave={() => { pointerX.set(0); pointerY.set(0); }}
       >
         <HeroBackdrop sources={heroImageUrls} alt={business.name} x={imageX} y={imageY} />
+        {editMode && (
+          <HeroEditToolbar
+            status={editStatus}
+            onImageUpload={onHeroImageUpload}
+          />
+        )}
         <div className="absolute inset-0" style={{ background: theme.heroOverlay }} />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.18),transparent_28%),radial-gradient(circle_at_18%_64%,var(--preview-primary)_0,transparent_30%),linear-gradient(180deg,transparent_45%,var(--preview-bg)_112%)] opacity-30" />
         <AtmosphericParticles />
@@ -72,11 +85,24 @@ export function HeroModule({ config, theme }) {
             </motion.h1>
             <motion.h2
               variants={reveal}
-              className="mt-7 max-w-3xl text-2xl font-extrabold leading-tight text-[var(--preview-text)]/90 sm:text-3xl lg:text-4xl"
+              className={`mt-7 max-w-3xl rounded-2xl text-2xl font-extrabold leading-tight text-[var(--preview-text)]/90 outline-none sm:text-3xl lg:text-4xl ${
+                editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
+              }`}
+              contentEditable={editMode}
+              suppressContentEditableWarning
+              onBlur={(event) => onHeroTextChange?.('hero_title', event.currentTarget.textContent)}
             >
               {branding.hero_title}
             </motion.h2>
-            <motion.p variants={reveal} className="mt-6 max-w-2xl text-lg leading-8 text-[var(--preview-muted)] sm:text-xl">
+            <motion.p
+              variants={reveal}
+              className={`mt-6 max-w-2xl rounded-2xl text-lg leading-8 text-[var(--preview-muted)] outline-none sm:text-xl ${
+                editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
+              }`}
+              contentEditable={editMode}
+              suppressContentEditableWarning
+              onBlur={(event) => onHeroTextChange?.('hero_subtitle', event.currentTarget.textContent)}
+            >
               {branding.hero_subtitle}
             </motion.p>
             <motion.div variants={reveal} className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -150,6 +176,43 @@ function HeroBackdrop({ sources, alt, x, y }) {
         else setFailed(true);
       }}
     />
+  );
+}
+
+function HeroEditToolbar({ status, onImageUpload }) {
+  const isSaving = status?.type === 'saving';
+
+  return (
+    <div className="absolute right-4 top-4 z-30 flex flex-col items-end gap-2 sm:right-6 sm:top-6">
+      <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/25 bg-black/45 px-4 text-sm font-extrabold text-white shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-black/60">
+        {isSaving ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
+        Trocar imagem
+        <input
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          disabled={isSaving}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) onImageUpload?.(file);
+            event.target.value = '';
+          }}
+        />
+      </label>
+      {status?.message && (
+        <div
+          className={`max-w-xs rounded-2xl border px-4 py-2 text-right text-xs font-bold shadow-2xl backdrop-blur-xl ${
+            status.type === 'error'
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : status.type === 'success'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-white/20 bg-black/45 text-white'
+          }`}
+        >
+          {status.message}
+        </div>
+      )}
+    </div>
   );
 }
 

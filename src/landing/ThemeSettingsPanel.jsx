@@ -15,7 +15,7 @@ export function ThemeSettingsPanel({ open, currentTheme, slug, onClose, onSelect
       />
 
       {/* ── Painel lateral ── */}
-      <aside className="absolute right-4 top-24 w-[calc(100%-2rem)] max-w-md rounded-[2rem] border border-[var(--preview-border)] bg-[var(--preview-surface)] p-5 shadow-[var(--preview-shadow)] sm:right-6">
+      <aside className="absolute bottom-4 right-4 top-20 w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-[2rem] border border-[var(--preview-border)] bg-[var(--preview-surface)] p-5 shadow-[var(--preview-shadow)] sm:bottom-auto sm:right-6 sm:top-24 sm:max-h-[calc(100dvh-7rem)]">
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-sm font-extrabold uppercase text-[var(--preview-primary)]">
