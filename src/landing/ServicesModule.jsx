@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, ImagePlus, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowRight, ImagePlus, Plus, Trash2 } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
 import { getServiceEmotionalLine, getServicesIntroCopy } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
+import { SafeImage } from './EditablePrimitives.jsx';
 
 export function ServicesModule({
   config,
@@ -144,14 +145,10 @@ function ServiceImage({ src, alt, theme, large = false, editMode = false, onImag
 
   if (unsupportedReason || !sources.length || failed) {
     return (
-      <div className={`relative grid ${height} place-items-center bg-[var(--preview-card)] text-center text-[var(--preview-primary)]`}>
-        {editMode && <ServiceImageUploadButton onImageUpload={onImageUpload} />}
-        <div>
-          <Sparkles size={42} className="mx-auto" />
-          <p className="mt-3 px-6 text-sm font-bold text-[var(--preview-muted)]">
-            {unsupportedReason || 'Imagem indisponível'}
-          </p>
-        </div>
+      <div className={`relative ${height} overflow-hidden`}>
+        <SafeImage variant="service" alt={alt}>
+          {editMode && <ServiceImageUploadButton onImageUpload={onImageUpload} />}
+        </SafeImage>
       </div>
     );
   }
@@ -161,7 +158,7 @@ function ServiceImage({ src, alt, theme, large = false, editMode = false, onImag
       className={`relative ${height} overflow-hidden`}
       style={{ borderTopLeftRadius: theme.radius, borderTopRightRadius: theme.radius }}
     >
-      {editMode && <ServiceImageUploadButton onImageUpload={onImageUpload} />}
+      {editMode && <ServiceImageUploadButton onImageUpload={onImageUpload} hasImage />}
       <img
         src={sources[sourceIndex]}
         alt={alt}
@@ -175,11 +172,11 @@ function ServiceImage({ src, alt, theme, large = false, editMode = false, onImag
   );
 }
 
-function ServiceImageUploadButton({ onImageUpload }) {
+function ServiceImageUploadButton({ onImageUpload, hasImage = false }) {
   return (
     <label className="absolute right-4 top-4 z-20 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/25 bg-black/50 px-3 text-xs font-extrabold text-white shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-black/65">
       <ImagePlus size={16} />
-      Trocar
+      {hasImage ? 'Trocar' : 'Adicionar imagem'}
       <input
         type="file"
         accept="image/*"

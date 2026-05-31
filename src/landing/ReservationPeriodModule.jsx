@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Mail, MapPin, Phone, Sparkles, UserRound } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Phone, Sparkles, UserRound } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import {
@@ -13,8 +13,9 @@ import {
   startOfDay,
 } from './dateUtils.js';
 import { SectionIntro } from './LandingShared.jsx';
+import { SmartContactList } from './EditablePrimitives.jsx';
 
-export function ReservationPeriodModule({ config, theme }) {
+export function ReservationPeriodModule({ config, theme, editMode = false, onEditContact }) {
   const { submission, business, location, availability, availabilityDateBlocks, preset } = config;
   const today = useMemo(() => startOfDay(new Date()), []);
   const [visibleMonth, setVisibleMonth] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
@@ -133,11 +134,7 @@ export function ReservationPeriodModule({ config, theme }) {
             description={config.conversion?.subtitle || 'Selecione a data inicial e final para consultar a disponibilidade do espaço.'}
             align="left"
           />
-          <div className="mt-8 space-y-4 text-[var(--preview-muted)]">
-            <Contact icon={<Phone size={19} />} text={business.whatsapp || submission.whatsapp || 'WhatsApp não informado'} />
-            <Contact icon={<Mail size={19} />} text={business.email || submission.email || 'E-mail não informado'} />
-            <Contact icon={<MapPin size={19} />} text={location.address || 'Endereço não informado'} />
-          </div>
+          <div className="mt-8"><SmartContactList whatsapp={business.whatsapp || submission.whatsapp} email={business.email || submission.email} address={location.address} isOwner={editMode} onEditField={onEditContact} /></div>
         </div>
 
         <div className={cardClass(theme, 'p-5 shadow-[var(--preview-shadow)]')} style={{ borderRadius: theme.radius }}>
@@ -222,10 +219,6 @@ function PeriodInput({ icon, label, value, placeholder, onChange }) {
       <input type="text" value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="h-12 w-full rounded-2xl border border-[var(--preview-border)] bg-[var(--preview-surface)] px-4 text-sm font-bold outline-none placeholder:text-[var(--preview-muted)] focus:border-[var(--preview-primary)]" />
     </label>
   );
-}
-
-function Contact({ icon, text }) {
-  return <div className="flex items-center gap-3 font-bold"><span className="text-[var(--preview-primary)]">{icon}</span><span>{text}</span></div>;
 }
 
 function enumerateDates(start, end) {

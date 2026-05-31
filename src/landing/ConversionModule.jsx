@@ -5,23 +5,24 @@ import { cardClass } from './theme.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { ScheduleModule } from './ScheduleModule.jsx';
 import { ReservationPeriodModule } from './ReservationPeriodModule.jsx';
+import { SmartContactList } from './EditablePrimitives.jsx';
 import { SectionIntro, reveal } from './LandingShared.jsx';
 
-export function ConversionModule({ config, theme }) {
+export function ConversionModule({ config, theme, editMode = false, onEditContact }) {
   const mode = config.conversion?.mode || 'appointment';
 
   if (mode === 'appointment') {
-    return <CalendarModule config={config} theme={theme} />;
+    return <CalendarModule config={config} theme={theme} editMode={editMode} onEditContact={onEditContact} />;
   }
 
   if (mode === 'consultation' && config.conversion.showSchedule) {
-    return <CalendarModule config={config} theme={theme} />;
+    return <CalendarModule config={config} theme={theme} editMode={editMode} onEditContact={onEditContact} />;
   }
 
   return (
     <section id="agenda" className="bg-[var(--preview-section)] py-24">
       <div className="section-shell grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <ConversionIntro config={config} />
+        <ConversionIntro config={config} editMode={editMode} onEditContact={onEditContact} />
         <div className={cardClass(theme, 'p-5 shadow-[var(--preview-shadow)]')} style={{ borderRadius: theme.radius }}>
           {mode === 'request' && <RequestForm config={config} theme={theme} />}
           {mode === 'consultation' && <ConsultationForm config={config} theme={theme} />}
@@ -32,13 +33,13 @@ export function ConversionModule({ config, theme }) {
   );
 }
 
-function CalendarModule({ config, theme }) {
+function CalendarModule({ config, theme, editMode, onEditContact }) {
   return config.conversion?.calendarMode === 'date_range'
-    ? <ReservationPeriodModule config={config} theme={theme} />
-    : <ScheduleModule config={config} theme={theme} />;
+    ? <ReservationPeriodModule config={config} theme={theme} editMode={editMode} onEditContact={onEditContact} />
+    : <ScheduleModule config={config} theme={theme} editMode={editMode} onEditContact={onEditContact} />;
 }
 
-function ConversionIntro({ config }) {
+function ConversionIntro({ config, editMode, onEditContact }) {
   const { conversion, business, submission, location } = config;
   return (
     <div>
@@ -48,11 +49,7 @@ function ConversionIntro({ config }) {
         description={conversion.subtitle}
         align="left"
       />
-      <div className="mt-8 space-y-4 text-[var(--preview-muted)]">
-        <Contact icon={<Phone size={19} />} text={business.whatsapp || submission.whatsapp || 'WhatsApp não informado'} />
-        <Contact icon={<Mail size={19} />} text={business.email || submission.email || 'E-mail não informado'} />
-        {location.address && <Contact icon={<BriefcaseBusiness size={19} />} text={location.address} />}
-      </div>
+      <div className="mt-8"><SmartContactList whatsapp={business.whatsapp || submission.whatsapp} email={business.email || submission.email} address={location.address} isOwner={editMode} onEditField={onEditContact} /></div>
     </div>
   );
 }
@@ -331,15 +328,6 @@ function TextareaField({ label, value, placeholder, onChange }) {
         className="w-full resize-none rounded-2xl border border-[var(--preview-border)] bg-[var(--preview-surface)] px-4 py-3 text-sm font-bold leading-6 text-[var(--preview-text)] outline-none transition placeholder:text-[var(--preview-muted)] focus:border-[var(--preview-primary)]"
       />
     </label>
-  );
-}
-
-function Contact({ icon, text }) {
-  return (
-    <div className="flex items-center gap-3 font-bold">
-      <span className="text-[var(--preview-primary)]">{icon}</span>
-      <span>{text}</span>
-    </div>
   );
 }
 

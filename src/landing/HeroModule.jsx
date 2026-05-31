@@ -57,6 +57,7 @@ export function HeroModule({
           <HeroEditToolbar
             status={editStatus}
             onImageUpload={onHeroImageUpload}
+            hasImage={heroImageUrls.length > 0}
           />
         )}
         <div className="absolute inset-0" style={{ background: theme.heroOverlay }} />
@@ -197,14 +198,14 @@ function HeroBackdrop({ sources, alt, x, y }) {
   );
 }
 
-function HeroEditToolbar({ status, onImageUpload }) {
+function HeroEditToolbar({ status, onImageUpload, hasImage }) {
   const isSaving = status?.type === 'saving';
 
   return (
     <div className="absolute right-4 top-4 z-30 flex flex-col items-end gap-2 sm:right-6 sm:top-6">
       <label className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/25 bg-black/45 px-4 text-sm font-extrabold text-white shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-black/60">
         {isSaving ? <Loader2 size={18} className="animate-spin" /> : <ImagePlus size={18} />}
-        Trocar imagem
+        {hasImage ? 'Trocar imagem' : 'Adicionar imagem principal'}
         <input
           type="file"
           accept="image/*"

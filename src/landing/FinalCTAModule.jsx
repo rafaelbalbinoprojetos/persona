@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ImagePlus } from 'lucide-react';
 import { getImageCandidates } from './imageUtils.js';
 import { getFeaturedProfessional, getSocialLinks, isVenueVertical } from './landingUtils.js';
 import { reveal } from './LandingShared.jsx';
 
-export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaTextChange }) {
+export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaTextChange, onCtaImageUpload }) {
   const professional = getFeaturedProfessional(config);
   const imageSources = getImageCandidates(professional.photo_url || config.branding.hero_image_url);
   const socialLinks = getSocialLinks(config);
@@ -93,7 +93,7 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
               </div>
             </div>
 
-            <div className="hidden space-y-4 lg:block">
+            {(imageSources.length > 0 || editMode) && <div className="hidden space-y-4 lg:block">
               <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/20 bg-white/15 shadow-2xl">
                 {imageSources.length ? (
                   <img
@@ -102,9 +102,14 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="grid h-full place-items-center text-6xl font-black">
-                    {(professional.name || config.business.name || 'P').charAt(0)}
-                  </div>
+                  <label className="grid h-full cursor-pointer place-items-center text-center text-white/80 transition hover:bg-white/10">
+                    <span><ImagePlus size={30} className="mx-auto" /><span className="mt-3 block text-sm font-extrabold">Adicionar foto ao CTA</span></span>
+                    <input type="file" accept="image/*" className="sr-only" onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) onCtaImageUpload?.(file);
+                      event.target.value = '';
+                    }} />
+                  </label>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               </div>
@@ -130,7 +135,7 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
                   </span>
                 </motion.a>
               )}
-            </div>
+            </div>}
           </div>
         </motion.div>
       </div>

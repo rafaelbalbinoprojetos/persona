@@ -6,7 +6,7 @@ import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { getPublicTestimonialName, getTestimonialInitials } from './landingUtils.js';
 import { reveal, SectionIntro, stagger } from './LandingShared.jsx';
 
-export function TestimonialsModule({ config, theme }) {
+export function TestimonialsModule({ config, theme, editMode = false }) {
   const { submission, preset, services } = config;
   const [testimonials, setTestimonials] = useState([]);
   const [status, setStatus] = useState('loading');
@@ -33,6 +33,7 @@ export function TestimonialsModule({ config, theme }) {
   }, [submission.slug]);
 
   if (status !== 'ready') {
+    if (!editMode) return null;
     return (
       <section id="depoimentos" className="bg-[var(--preview-bg)] py-24">
         <div className="section-shell">
@@ -49,11 +50,11 @@ export function TestimonialsModule({ config, theme }) {
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-[var(--preview-surface)] text-[var(--preview-primary)]">
                 <Quote size={26} />
               </div>
-              <h3 className="mt-5 text-2xl font-extrabold">Nenhum depoimento publicado ainda</h3>
+              <h3 className="mt-5 text-2xl font-extrabold">Adicionar primeiro depoimento</h3>
               <p className="mx-auto mt-3 max-w-xl text-sm font-semibold leading-7 text-[var(--preview-muted)]">
-                Cadastre depoimentos no dashboard, marque autorização de uso e defina o status como
-                ativo para exibir cards reais nesta seção.
+                Depoimentos autorizados aumentam a confiança e aparecem automaticamente nesta seção.
               </p>
+              <a href={`/dashboard?slug=${encodeURIComponent(submission.slug)}&tab=testimonials`} className="pill-button mt-5 bg-[var(--preview-primary)] text-white">Adicionar depoimento</a>
             </div>
           </div>
         </div>

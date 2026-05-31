@@ -87,7 +87,7 @@ function GalleryCard({ item, theme, index, editMode = false, onTextChange, onIma
         className="relative aspect-[4/5] overflow-hidden bg-[var(--preview-card)]"
         style={{ borderRadius: `calc(${theme.radius} - 0.45rem)` }}
       >
-        {editMode && <GalleryUploadButton onImageUpload={(file) => onImageUpload?.(index, file)} />}
+        {editMode && <GalleryUploadButton hasImage={sources.length > 0 && !failed} onImageUpload={(file) => onImageUpload?.(index, file)} />}
         {sources.length && !failed ? (
           <img
             src={sources[sourceIndex]}
@@ -106,7 +106,7 @@ function GalleryCard({ item, theme, index, editMode = false, onTextChange, onIma
                 Imagem {index + 1}
               </p>
               <p className="mt-2 px-6 text-xs font-semibold text-[var(--preview-muted)]">
-                Adicione uma foto para preencher este card.
+                Complete sua galeria diretamente aqui.
               </p>
             </div>
           </div>
@@ -148,11 +148,11 @@ function GalleryCard({ item, theme, index, editMode = false, onTextChange, onIma
   );
 }
 
-function GalleryUploadButton({ onImageUpload }) {
+function GalleryUploadButton({ onImageUpload, hasImage }) {
   return (
     <label className="absolute right-4 top-4 z-20 inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/25 bg-black/50 px-3 text-xs font-extrabold text-white shadow-2xl backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-black/65">
       <ImagePlus size={16} />
-      Trocar
+      {hasImage ? 'Trocar' : 'Adicionar imagem'}
       <input
         type="file"
         accept="image/*"

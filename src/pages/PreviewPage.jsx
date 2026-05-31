@@ -175,6 +175,20 @@ function PreviewLanding({ submission }) {
     await saveSubmission(nextSubmission);
   }
 
+  async function editContactField(field) {
+    const labels = { whatsapp: 'WhatsApp com DDD', email: 'e-mail', address: 'endereço', instagram_url: 'Instagram ou URL da rede social' };
+    const currentValue = field === 'address'
+      ? config.location.address
+      : config.business[field] || localSubmission[field] || '';
+    const value = window.prompt(`Informe o ${labels[field] || field}:`, currentValue);
+    if (value === null || !String(value).trim()) return;
+    const nextSubmission = field === 'address'
+      ? withLocationField(localSubmission, 'address', String(value).trim())
+      : withBusinessField(localSubmission, field, String(value).trim());
+    setLocalSubmission(nextSubmission);
+    await saveSubmission(nextSubmission, 'Contato atualizado.');
+  }
+
   async function uploadLandingImage(file, pathPrefix) {
     if (!file || !session?.user?.id) return;
     if (!file.type.startsWith('image/')) {
@@ -337,7 +351,7 @@ function PreviewLanding({ submission }) {
           />
         )}
         {modules.editorialHighlight && (editorial || config.editorialHighlight?.title) && <EditorialHighlightModule config={config} theme={config.theme} />}
-        {modules.gallery && (
+        {(modules.gallery || canEdit) && (
           <GalleryModule
             config={config}
             theme={config.theme}
@@ -347,20 +361,21 @@ function PreviewLanding({ submission }) {
             onRemoveGalleryItem={removeGalleryItem}
           />
         )}
-        {modules.schedule && <ConversionModule config={config} theme={config.theme} />}
-        {modules.testimonials && <TestimonialsModule config={config} theme={config.theme} />}
-        {modules.faq && <FAQModule config={config} theme={config.theme} />}
+        {modules.schedule && <ConversionModule config={config} theme={config.theme} editMode={canEdit} onEditContact={editContactField} />}
+        {(modules.testimonials || canEdit) && <TestimonialsModule config={config} theme={config.theme} editMode={canEdit} />}
+        {(modules.faq || canEdit) && <FAQModule config={config} theme={config.theme} />}
         {modules.finalCta && (
           <FinalCTAModule
             config={config}
             theme={config.theme}
             editMode={canEdit}
             onFinalCtaTextChange={updateFinalCtaText}
+            onCtaImageUpload={uploadHeroImage}
           />
         )}
       </main>
 
-      {modules.footer && <FooterModule config={config} theme={config.theme} />}
+      {modules.footer && <FooterModule config={config} theme={config.theme} editMode={canEdit} onEditContact={editContactField} onAddSocial={() => editContactField('instagram_url')} />}
     </div>
   );
 }
@@ -378,6 +393,29 @@ function withBrandingField(submission, field, value) {
     payload: {
       ...payload,
       business_branding: nextBranding,
+    },
+  };
+}
+
+function withBusinessField(submission, field, value) {
+  const payload = submission.payload || {};
+  return {
+    ...submission,
+    [field]: value,
+    payload: {
+      ...payload,
+      businesses: { ...(payload.businesses || {}), [field]: value },
+    },
+  };
+}
+
+function withLocationField(submission, field, value) {
+  const payload = submission.payload || {};
+  return {
+    ...submission,
+    payload: {
+      ...payload,
+      business_locations: { ...(payload.business_locations || {}), [field]: value },
     },
   };
 }

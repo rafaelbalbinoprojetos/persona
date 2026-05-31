@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, Mail, MapPin, Phone, Sparkles, UserRound } from 'lucide-react';
+import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, Phone, Sparkles, UserRound } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { getScheduleCopy } from './landingUtils.js';
@@ -19,8 +19,9 @@ import {
   startOfDay,
 } from './dateUtils.js';
 import { SectionIntro } from './LandingShared.jsx';
+import { SmartContactList } from './EditablePrimitives.jsx';
 
-export function ScheduleModule({ config, theme }) {
+export function ScheduleModule({ config, theme, editMode = false, onEditContact }) {
   const { submission, business, location, availability, availabilityBreaks, availabilityDateBlocks, preset } = config;
   const copy = getScheduleCopy(config);
   const today = useMemo(() => startOfDay(new Date()), []);
@@ -195,20 +196,7 @@ export function ScheduleModule({ config, theme }) {
             description={config.conversion?.subtitle || copy.description}
             align="left"
           />
-          <div className="mt-8 space-y-4 text-[var(--preview-muted)]">
-            <Contact
-              icon={<Phone size={19} />}
-              text={business.whatsapp || submission.whatsapp || 'WhatsApp não informado'}
-            />
-            <Contact
-              icon={<Mail size={19} />}
-              text={business.email || submission.email || 'E-mail não informado'}
-            />
-            <Contact
-              icon={<MapPin size={19} />}
-              text={location.address || 'Endereço não informado'}
-            />
-          </div>
+          <div className="mt-8"><SmartContactList whatsapp={business.whatsapp || submission.whatsapp} email={business.email || submission.email} address={location.address} isOwner={editMode} onEditField={onEditContact} /></div>
           {location.address && config.enabledModules.location && (
             <LocationMap address={location.address} />
           )}
@@ -449,15 +437,6 @@ function ScheduleInput({ icon, label, value, placeholder, onChange }) {
         className="h-12 w-full rounded-2xl border border-[var(--preview-border)] bg-[var(--preview-surface)] px-4 text-sm font-bold text-[var(--preview-text)] outline-none transition placeholder:text-[var(--preview-muted)] focus:border-[var(--preview-primary)]"
       />
     </label>
-  );
-}
-
-function Contact({ icon, text }) {
-  return (
-    <div className="flex items-center gap-3 font-bold">
-      <span className="text-[var(--preview-primary)]">{icon}</span>
-      <span>{text}</span>
-    </div>
   );
 }
 

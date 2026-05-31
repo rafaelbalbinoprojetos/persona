@@ -53,10 +53,11 @@ const EMPTY_TESTIMONIAL_FORM = {
 
 export default function DashboardPage() {
   const initialSlug = new URLSearchParams(window.location.search).get('slug') || '';
+  const initialTab = new URLSearchParams(window.location.search).get('tab') || '';
 
   const [submissions, setSubmissions] = useState([]);
   const [selectedId, setSelectedId] = useState('');
-  const [activeTab, setActiveTab] = useState(initialSlug ? 'appearance' : 'overview');
+  const [activeTab, setActiveTab] = useState(initialTab || (initialSlug ? 'appearance' : 'overview'));
   const [draft, setDraft] = useState(null);
   const [status, setStatus] = useState({ type: 'idle', message: '' });
 

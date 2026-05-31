@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { getFeaturedProfessional, getFooterCopy, getSocialLinks } from './landingUtils.js';
+import { SmartContactList, SmartSocialLinks } from './EditablePrimitives.jsx';
 
-export function FooterModule({ config, theme }) {
+export function FooterModule({ config, theme, editMode = false, onEditContact, onAddSocial }) {
   const { business, services } = config;
   const professional = getFeaturedProfessional(config);
   const socialLinks = getSocialLinks(config);
@@ -10,11 +11,11 @@ export function FooterModule({ config, theme }) {
   const editorial = theme.key === 'dark-editorial';
 
   const navItems = [
-    { label: copy.exploreServicesLabel, href: '#servicos' },
-    { label: 'Galeria', href: '#galeria' },
-    { label: config.preset.sectionLabels.schedule, href: '#agenda' },
-    { label: 'Depoimentos', href: '#depoimentos' },
-  ];
+    config.enabledModules.services && { label: copy.exploreServicesLabel, href: '#servicos' },
+    config.enabledModules.gallery && config.gallery.length > 0 && { label: 'Galeria', href: '#galeria' },
+    config.enabledModules.schedule && { label: config.preset.sectionLabels.schedule, href: '#agenda' },
+    config.enabledModules.testimonials && { label: 'Depoimentos', href: '#depoimentos' },
+  ].filter(Boolean);
 
   return (
     <footer className="relative overflow-hidden border-t border-[var(--preview-border)] bg-[var(--preview-bg)] py-20">
@@ -37,13 +38,9 @@ export function FooterModule({ config, theme }) {
             <p className="mt-6 max-w-sm text-base font-semibold leading-8 text-[var(--preview-muted)]">
               {copy.description}
             </p>
-            {socialLinks.length > 0 && (
-              <div className="mt-7 flex flex-wrap gap-3">
-                {socialLinks.map((social) => (
-                  <SocialIconLink key={social.label} social={social} />
-                ))}
-              </div>
-            )}
+            <div className="mt-7">
+              <SmartSocialLinks links={socialLinks} isOwner={editMode} onAdd={onAddSocial} renderLink={(social) => <SocialIconLink key={social.label} social={social} />} />
+            </div>
           </div>
 
           {/* ── Colunas de navegação ── */}
@@ -61,11 +58,7 @@ export function FooterModule({ config, theme }) {
             <p className="text-xs font-black uppercase tracking-[0.22em] text-[var(--preview-primary)]">
               Contato
             </p>
-            <div className="mt-5 space-y-3 text-sm font-semibold leading-7 text-[var(--preview-muted)]">
-              {business.whatsapp && <p>{business.whatsapp}</p>}
-              {business.email && <p>{business.email}</p>}
-              <p>{copy.contactFallback}</p>
-            </div>
+            <div className="mt-5"><SmartContactList whatsapp={business.whatsapp} email={business.email} address={config.location.address} isOwner={editMode} onEditField={onEditContact} /></div>
           </div>
         </div>
 
