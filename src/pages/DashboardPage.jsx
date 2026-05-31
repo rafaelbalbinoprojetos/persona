@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowUpRight,
-  BarChart3,
   CalendarCheck,
   Edit3,
   Image,
@@ -24,7 +23,6 @@ import { AgendaEditor } from '../components/dashboard/AgendaEditor.jsx';
 import { AppearanceEditor } from '../components/dashboard/AppearanceEditor.jsx';
 import { GalleryEditor } from '../components/dashboard/GalleryEditor.jsx';
 import { Overview } from '../components/dashboard/Overview.jsx';
-import { ProfessionalManagement } from '../components/dashboard/ProfessionalManagement.jsx';
 import { ServicesEditor } from '../components/dashboard/ServicesEditor.jsx';
 import { TestimonialsEditor } from '../components/dashboard/TestimonialsEditor.jsx';
 
@@ -32,7 +30,6 @@ import { TestimonialsEditor } from '../components/dashboard/TestimonialsEditor.j
 
 const TABS = [
   { key: 'overview', label: 'Resumo', Icon: LayoutDashboard },
-  { key: 'management', label: 'Gestão', Icon: BarChart3 },
   { key: 'appearance', label: 'Aparência', Icon: Palette },
   { key: 'services', label: 'Serviços', Icon: Sparkles },
   { key: 'gallery', label: 'Galeria', Icon: Image },
@@ -62,15 +59,6 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState(initialSlug ? 'appearance' : 'overview');
   const [draft, setDraft] = useState(null);
   const [status, setStatus] = useState({ type: 'idle', message: '' });
-
-  // Gestão de agendamentos
-  const [appointments, setAppointments] = useState([]);
-  const [appointmentsStatus, setAppointmentsStatus] = useState({ type: 'idle', message: '' });
-  const [reservations, setReservations] = useState([]);
-  const [reservationsStatus, setReservationsStatus] = useState({ type: 'idle', message: '' });
-  const [managementDate, setManagementDate] = useState(
-    () => new Date().toISOString().slice(0, 10),
-  );
 
   // Depoimentos
   const [testimonials, setTestimonials] = useState([]);
@@ -103,8 +91,6 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!selectedSubmission?.slug) return;
-    loadAppointments(selectedSubmission.slug);
-    loadReservations(selectedSubmission.slug);
     loadTestimonials(selectedSubmission.slug);
   }, [selectedSubmission?.slug]);
 
@@ -130,52 +116,6 @@ export default function DashboardPage() {
     });
   }
 
-  async function loadAppointments(slug) {
-    if (!isSupabaseConfigured) return;
-    setAppointmentsStatus({ type: 'loading', message: 'Carregando agenda...' });
-    const { data, error } = await supabase
-      .from('appointment_requests')
-      .select('id, submission_slug, business_name, customer_name, customer_whatsapp, appointment_date, start_time, status, source, payload, created_at')
-      .eq('submission_slug', slug)
-      .order('appointment_date', { ascending: true })
-      .order('start_time', { ascending: true });
-
-    if (error) {
-      setAppointments([]);
-      setAppointmentsStatus({
-        type: 'error',
-        message: error.code === '42501'
-          ? 'Sem permissão para ler agendamentos. Aplique a policy de gestão no Supabase.'
-          : error.message,
-      });
-      return;
-    }
-    setAppointments(data || []);
-    setAppointmentsStatus({ type: 'success', message: '' });
-  }
-
-  async function loadReservations(slug) {
-    if (!isSupabaseConfigured) return;
-    const { data, error } = await supabase
-      .from('reservation_requests')
-      .select('id, submission_slug, business_name, customer_name, customer_whatsapp, start_date, end_date, status, source, payload, created_at')
-      .eq('submission_slug', slug)
-      .order('start_date', { ascending: true });
-
-    if (error) {
-      setReservations([]);
-      setReservationsStatus({
-        type: 'error',
-        message: error.code === '42P01' || error.code === 'PGRST205'
-          ? 'Tabela de reservas por período ainda não instalada. Execute supabase/reservation_requests.sql.'
-          : error.message,
-      });
-      return;
-    }
-    setReservations(data || []);
-    setReservationsStatus({ type: 'success', message: '' });
-  }
-
   async function loadTestimonials(slug) {
     if (!isSupabaseConfigured) return;
     setTestimonialsStatus({ type: 'loading', message: 'Carregando depoimentos...' });
@@ -198,28 +138,6 @@ export default function DashboardPage() {
     }
     setTestimonials(data || []);
     setTestimonialsStatus({ type: 'success', message: '' });
-  }
-
-  // ─── Ações de agendamento ───────────────────────────────────────────────────
-
-  async function updateAppointmentStatus(id, nextStatus) {
-    setAppointmentsStatus({ type: 'saving', message: 'Atualizando agendamento...' });
-    const { error } = await supabase.from('appointment_requests').update({ status: nextStatus }).eq('id', id);
-    if (error) { setAppointmentsStatus({ type: 'error', message: error.message }); return; }
-    setAppointments((current) =>
-      current.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)),
-    );
-    setAppointmentsStatus({ type: 'success', message: 'Agendamento atualizado.' });
-  }
-
-  async function updateReservationStatus(id, nextStatus) {
-    setReservationsStatus({ type: 'saving', message: 'Atualizando reserva...' });
-    const { error } = await supabase.from('reservation_requests').update({ status: nextStatus }).eq('id', id);
-    if (error) { setReservationsStatus({ type: 'error', message: error.message }); return; }
-    setReservations((current) =>
-      current.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)),
-    );
-    setReservationsStatus({ type: 'success', message: 'Reserva atualizada.' });
   }
 
   // ─── Ações de depoimentos ───────────────────────────────────────────────────
@@ -636,7 +554,6 @@ export default function DashboardPage() {
 
   const tabTitle = {
     overview: 'Resumo do cadastro',
-    management: 'Gestão da agenda',
     testimonials: 'Depoimentos',
     gallery: 'Galeria',
   }[activeTab] || 'Editando cadastro';
@@ -835,23 +752,6 @@ export default function DashboardPage() {
               )}
 
               {activeTab === 'overview' && <Overview draft={draft} />}
-
-              {activeTab === 'management' && (
-                <ProfessionalManagement
-                  appointments={appointments}
-                  reservations={reservations}
-                  status={appointmentsStatus}
-                  reservationsStatus={reservationsStatus}
-                  selectedDate={managementDate}
-                  onDateChange={setManagementDate}
-                  onRefresh={() => {
-                    loadAppointments(draft.slug);
-                    loadReservations(draft.slug);
-                  }}
-                  onUpdateStatus={updateAppointmentStatus}
-                  onUpdateReservationStatus={updateReservationStatus}
-                />
-              )}
 
               {activeTab === 'appearance' && (
                 <AppearanceEditor

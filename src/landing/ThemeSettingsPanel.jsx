@@ -1,4 +1,4 @@
-import { ArrowRight, Palette, X } from 'lucide-react';
+import { ArrowRight, CalendarCheck, Palette, Settings, X } from 'lucide-react';
 import { themeTokens } from './theme.js';
 
 export function ThemeSettingsPanel({ open, currentTheme, slug, onClose, onSelect }) {
@@ -19,12 +19,12 @@ export function ThemeSettingsPanel({ open, currentTheme, slug, onClose, onSelect
         <div className="flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-sm font-extrabold uppercase text-[var(--preview-primary)]">
-              <Palette size={18} />
-              Aparência
+              <Settings size={18} />
+              Configurações
             </div>
-            <h2 className="mt-2 text-2xl font-extrabold">Temas da página</h2>
+            <h2 className="mt-2 text-2xl font-extrabold">Gerencie sua página</h2>
             <p className="mt-2 text-sm font-semibold leading-6 text-[var(--preview-muted)]">
-              Escolha uma combinação visual para esta página do cliente.
+              Acesse a operação ou ajuste a apresentação visual.
             </p>
           </div>
           <button
@@ -35,6 +35,33 @@ export function ThemeSettingsPanel({ open, currentTheme, slug, onClose, onSelect
           >
             <X size={19} />
           </button>
+        </div>
+
+        <a
+          href={`/agenda?slug=${encodeURIComponent(slug)}`}
+          className="mt-6 flex items-center justify-between gap-4 rounded-3xl border border-[var(--preview-border)] bg-[var(--preview-card)] p-4 text-[var(--preview-text)] transition hover:-translate-y-0.5 hover:border-[var(--preview-primary)]"
+        >
+          <span className="flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-full bg-[var(--preview-primary)] text-white shadow-[var(--preview-glow)]">
+              <CalendarCheck size={20} />
+            </span>
+            <span>
+              <span className="block font-extrabold">Gerenciar agenda e reservas</span>
+              <span className="mt-1 block text-xs font-bold text-[var(--preview-muted)]">Horários, períodos e solicitações recebidas</span>
+            </span>
+          </span>
+          <ArrowRight size={18} className="shrink-0 text-[var(--preview-primary)]" />
+        </a>
+
+        <div className="mt-7 border-t border-[var(--preview-border)] pt-6">
+          <div className="flex items-center gap-2 text-sm font-extrabold uppercase text-[var(--preview-primary)]">
+            <Palette size={18} />
+            Aparência
+          </div>
+          <h2 className="mt-2 text-2xl font-extrabold">Temas da página</h2>
+          <p className="mt-2 text-sm font-semibold leading-6 text-[var(--preview-muted)]">
+            Escolha uma combinação visual para esta página do cliente.
+          </p>
         </div>
 
         <div className="mt-6 grid gap-3">

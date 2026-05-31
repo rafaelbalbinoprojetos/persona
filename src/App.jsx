@@ -1,5 +1,6 @@
 import { AuthGate } from './components/auth/AuthGate.jsx';
 import ClientLanding from './pages/ClientLanding.jsx';
+import AgendaManagementPage from './pages/AgendaManagementPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import OnboardingEntry from './pages/OnboardingEntry.jsx';
 import PreviewPage from './pages/PreviewPage.jsx';
@@ -20,6 +21,14 @@ export default function App() {
     return (
       <AuthGate>
         <DashboardPage />
+      </AuthGate>
+    );
+  }
+
+  if (pathname === '/agenda' || pathname.startsWith('/agenda/')) {
+    return (
+      <AuthGate>
+        <AgendaManagementPage />
       </AuthGate>
     );
   }
