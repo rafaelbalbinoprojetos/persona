@@ -5,6 +5,7 @@ import { themeToCssVars } from '../landing/theme.js';
 import {
   CenteredState,
   ConversionModule,
+  EditorialHighlightModule,
   FAQModule,
   FinalCTAModule,
   FooterModule,
@@ -15,6 +16,7 @@ import {
   SignatureModule,
   TestimonialsModule,
   ThemeSettingsPanel,
+  TrustStatsModule,
 } from '../landing/modules.jsx';
 
 export default function PreviewPage() {
@@ -82,6 +84,7 @@ function PreviewLanding({ submission }) {
   const config = useMemo(() => buildPageConfigFromOnboarding(localSubmission, themeKey), [localSubmission, themeKey]);
   const themeStyle = useMemo(() => themeToCssVars(config.theme), [config.theme]);
   const modules = config.enabledModules;
+  const editorial = config.theme.key === 'dark-editorial';
   const canEdit = Boolean(session?.user?.id && localSubmission.owner_id && session.user.id === localSubmission.owner_id);
 
   useEffect(() => {
@@ -313,6 +316,7 @@ function PreviewLanding({ submission }) {
             onHeroImageUpload={uploadHeroImage}
           />
         )}
+        {modules.trustStats && (editorial || config.trustStats.length > 0) && <TrustStatsModule config={config} theme={config.theme} />}
         {modules.services && (
           <ServicesModule
             config={config}
@@ -332,6 +336,7 @@ function PreviewLanding({ submission }) {
             onProfessionalTextChange={updatePrimaryProfessionalText}
           />
         )}
+        {modules.editorialHighlight && (editorial || config.editorialHighlight?.title) && <EditorialHighlightModule config={config} theme={config.theme} />}
         {modules.gallery && (
           <GalleryModule
             config={config}

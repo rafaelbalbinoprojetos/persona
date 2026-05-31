@@ -14,7 +14,7 @@ export const stagger = {
   visible: { transition: { staggerChildren: 0.11, delayChildren: 0.08 } },
 };
 
-export function SectionIntro({ eyebrow, title, description, align = 'center' }) {
+export function SectionIntro({ eyebrow, title, description, align = 'center', tone = 'default' }) {
   return (
     <motion.div
       className={`mx-auto max-w-3xl ${align === 'left' ? 'text-left' : 'text-center'}`}
@@ -23,13 +23,13 @@ export function SectionIntro({ eyebrow, title, description, align = 'center' }) 
       whileInView="visible"
       viewport={{ once: true, margin: '-80px' }}
     >
-      <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[var(--preview-primary)]">
+      <p className={`text-sm font-extrabold uppercase ${tone === 'light' ? 'text-violet-700' : 'text-[var(--preview-primary)]'}`}>
         {eyebrow}
       </p>
-      <h2 className="mt-4 text-4xl font-black leading-tight tracking-[-0.03em] sm:text-5xl">
+      <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
         {title}
       </h2>
-      <p className="mt-5 text-lg leading-8 text-[var(--preview-muted)]">{description}</p>
+      <p className={`mt-5 text-lg leading-8 ${tone === 'light' ? 'text-slate-600' : 'text-[var(--preview-muted)]'}`}>{description}</p>
     </motion.div>
   );
 }

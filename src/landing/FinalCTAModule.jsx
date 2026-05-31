@@ -10,6 +10,8 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
   const socialLinks = getSocialLinks(config);
   const primarySocial = socialLinks[0];
   const isVenue = isVenueVertical(config.vertical);
+  const editorial = theme.key === 'dark-editorial';
+  const whatsapp = String(config.business.whatsapp || config.submission.whatsapp || '').replace(/\D/g, '');
   const defaultSubtitle = isVenue
     ? `Consulte a disponibilidade de ${professional.name || config.business.name} e envie os detalhes da sua reserva.`
     : `Agende uma avaliação com ${professional.name || config.business.name} e tenha uma experiência conduzida com clareza, cuidado e presença profissional.`;
@@ -33,16 +35,22 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
             borderRadius: theme.heroRadius,
           }}
         >
-          <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl" />
-          <div className="absolute -bottom-24 right-16 h-72 w-72 rounded-full bg-black/20 blur-3xl" />
+          {editorial && imageSources.length > 0 && (
+            <>
+              <img src={imageSources[0]} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,13,0.96),rgba(5,7,13,0.78)_58%,rgba(5,7,13,0.42))]" />
+            </>
+          )}
+          {!editorial && <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl" />}
+          {!editorial && <div className="absolute -bottom-24 right-16 h-72 w-72 rounded-full bg-black/20 blur-3xl" />}
 
           <div className="relative z-10 grid gap-10 lg:grid-cols-[1fr_320px] lg:items-center">
             <div>
-              <p className="text-sm font-extrabold uppercase tracking-[0.26em] text-white/70">
+              <p className="text-sm font-extrabold uppercase text-white/70">
                 Próximo passo
               </p>
               <h2
-                className={`mt-5 max-w-3xl rounded-2xl text-4xl font-black leading-tight tracking-[-0.03em] outline-none sm:text-5xl lg:text-6xl ${
+                className={`mt-5 max-w-3xl rounded-2xl text-4xl font-black leading-tight outline-none sm:text-5xl lg:text-6xl ${
                   editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
                 }`}
                 contentEditable={editMode}
@@ -61,10 +69,8 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
               >
                 {finalCta.subtitle}
               </p>
-              <a
-                href="#agenda"
-                className="pill-button mt-9 bg-white text-[var(--preview-primary)] shadow-2xl"
-              >
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <a href="#agenda" className="pill-button bg-white text-[var(--preview-primary)] shadow-2xl">
                 <span
                   className={editMode ? 'cursor-text rounded-lg outline-none ring-2 ring-transparent focus:bg-[var(--preview-primary)]/10 focus:px-1.5 focus:ring-[var(--preview-primary)]/25' : ''}
                   contentEditable={editMode}
@@ -78,6 +84,13 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
                 </span>
                 <ArrowRight size={18} />
               </a>
+                {whatsapp && (
+                  <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" className="pill-button border border-white/25 bg-white/10 text-white backdrop-blur-xl">
+                    WhatsApp
+                    <ArrowRight size={18} />
+                  </a>
+                )}
+              </div>
             </div>
 
             <div className="hidden space-y-4 lg:block">
@@ -108,7 +121,7 @@ export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaText
                     <primarySocial.Icon size={21} />
                   </span>
                   <span>
-                    <span className="block text-xs font-black uppercase tracking-[0.22em] text-white/60">
+                    <span className="block text-xs font-black uppercase text-white/60">
                       Acompanhe
                     </span>
                     <span className="mt-1 block font-black">

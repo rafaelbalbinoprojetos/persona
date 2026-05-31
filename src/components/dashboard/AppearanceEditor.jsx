@@ -5,7 +5,9 @@ import { themeTokens } from '../../landing/theme.js';
 
 const moduleLabels = {
   hero: 'Hero',
+  trustStats: 'Estatísticas de confiança',
   services: 'Serviços',
+  editorialHighlight: 'Destaque editorial',
   schedule: 'Atendimento',
   testimonials: 'Depoimentos',
   faq: 'FAQ',

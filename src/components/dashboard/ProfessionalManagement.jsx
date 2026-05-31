@@ -22,13 +22,14 @@ export function ProfessionalManagement({
   onUpdateStatus,
   onUpdateReservationStatus,
 }) {
-  const activeAppointments = appointments.filter((item) => item.status !== 'cancelled');
+  const allRequests = [...appointments, ...reservations];
+  const activeAppointments = allRequests.filter((item) => item.status !== 'cancelled');
   const dayAppointments = appointments
     .filter((item) => item.appointment_date === selectedDate)
     .sort((a, b) => String(a.start_time).localeCompare(String(b.start_time)));
-  const pending = appointments.filter((item) => item.status === 'pending').length;
-  const confirmed = appointments.filter((item) => item.status === 'confirmed').length;
-  const completed = appointments.filter((item) => item.status === 'completed').length;
+  const pending = allRequests.filter((item) => item.status === 'pending').length;
+  const confirmed = allRequests.filter((item) => item.status === 'confirmed').length;
+  const completed = allRequests.filter((item) => item.status === 'completed').length;
   const noShowRisk = dayAppointments.filter((item) => item.status === 'pending').length;
   const reasonData = buildChartData(appointments, getAppointmentReason);
   const statusData = buildChartData(appointments, (item) => appointmentStatusLabel(item.status));
@@ -242,13 +243,13 @@ export function ProfessionalManagement({
         />
         <InsightCard
           title="Taxa de confirmação"
-          value={`${percentage(confirmed, appointments.length)}%`}
-          description="Percentual de agendamentos já confirmados."
+          value={`${percentage(confirmed, allRequests.length)}%`}
+          description="Percentual de solicitações já confirmadas."
         />
         <InsightCard
           title="Volume total"
-          value={appointments.length}
-          description="Total de solicitações recebidas para esta página."
+          value={allRequests.length}
+          description="Total de agendamentos e reservas recebidos para esta página."
         />
       </div>
     </div>

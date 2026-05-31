@@ -54,6 +54,14 @@ const initialForm = {
   signatureTitle: 'Assinatura profissional',
   signatureText: '',
   signatureTags: [],
+  trustStats: [],
+  editorialHighlight: {
+    eyebrow: '',
+    title: '',
+    description: '',
+    benefits: [],
+    imageUrl: '',
+  },
   instagramUrl: '',
   tiktokUrl: '',
   linkedinUrl: '',
@@ -689,6 +697,8 @@ function buildPayload(form) {
       is_main: true,
     },
     services: form.services.filter((service) => service.name),
+    trustStats: form.trustStats || [],
+    editorialHighlight: form.editorialHighlight || {},
     professionals: form.businessName ? [{
       name: form.professionalName || form.businessName,
       specialty: form.specialty || form.segment,
@@ -723,7 +733,9 @@ function buildPayload(form) {
     },
     enabledModules: {
       hero: true,
+      trustStats: true,
       services: true,
+      editorialHighlight: true,
       professionals: false,
       schedule: true,
       testimonials: false,

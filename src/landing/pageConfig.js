@@ -42,6 +42,8 @@ export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
       address: payload.business_locations?.address || business.address || submission.address || '',
     },
     services,
+    trustStats: normalizeTrustStats(payload.trustStats || payload.trust_stats || []),
+    editorialHighlight: payload.editorialHighlight || payload.editorial_highlight || {},
     professionals: payload.professionals || [],
     testimonials: payload.testimonials || [],
     faqs: payload.faqs || [],
@@ -52,6 +54,17 @@ export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
     finalCta: payload.finalCta || payload.final_cta || {},
     conversion: normalizeConversion(payload.conversion, preset, services),
   };
+}
+
+function normalizeTrustStats(items) {
+  return (Array.isArray(items) ? items : [])
+    .slice(0, 4)
+    .map((item) => ({
+      label: item.label || item.title || '',
+      value: item.value || item.number || '',
+      icon: item.icon || 'sparkles',
+    }))
+    .filter((item) => item.label && item.value);
 }
 
 function normalizeServices(services, preset) {

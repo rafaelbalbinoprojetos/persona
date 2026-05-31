@@ -19,6 +19,7 @@ export function normalizePersonaPayload(raw = {}) {
   const schedule = raw.schedule || {};
   const social = raw.social || {};
   const finalCta = raw.finalCta || {};
+  const editorialHighlight = raw.editorialHighlight || {};
   const segment = cleanText(business.segment || branding.specialty || 'servicos');
   const mode = normalizeConversionMode(conversion.mode, segment);
   const businessName = cleanText(business.name || branding.professionalName || 'Profissional Persona');
@@ -51,6 +52,14 @@ export function normalizePersonaPayload(raw = {}) {
       signatureTags: normalizeStringArray(branding.signatureTags).slice(0, 4),
     },
     services: normalizeServices(raw.services, segment),
+    trustStats: normalizeTrustStats(raw.trustStats),
+    editorialHighlight: {
+      eyebrow: cleanText(editorialHighlight.eyebrow || ''),
+      title: cleanText(editorialHighlight.title || ''),
+      description: cleanText(editorialHighlight.description || ''),
+      benefits: normalizeStringArray(editorialHighlight.benefits).slice(0, 4),
+      imageUrl: cleanUrl(editorialHighlight.imageUrl || editorialHighlight.image_url || ''),
+    },
     conversion: {
       mode,
       calendarMode: cleanText(conversion.calendarMode || (isVenueSegment(segment) ? 'date_range' : 'time_slots')),
@@ -135,6 +144,8 @@ export function mergePersonaWithDefaults(persona, defaults = {}) {
       price: service.price ?? '',
       image_url: service.image_url,
     })),
+    trustStats: normalized.trustStats,
+    editorialHighlight: normalized.editorialHighlight,
     schedule: {
       days: normalized.schedule.days,
       startTime: normalized.schedule.startTime,
@@ -172,6 +183,8 @@ export function mapPersonaToSupabasePayload(persona) {
       is_main: true,
     },
     services: normalized.services,
+    trustStats: normalized.trustStats,
+    editorialHighlight: normalized.editorialHighlight,
     conversion: normalized.conversion,
     faqs: normalized.faq,
     socials: normalized.social,
@@ -226,6 +239,17 @@ function normalizeFaq(items = []) {
       answer: cleanText(item.answer || ''),
     }))
     .filter((item) => item.question && item.answer);
+}
+
+function normalizeTrustStats(items = []) {
+  return (Array.isArray(items) ? items : [])
+    .slice(0, 4)
+    .map((item) => ({
+      label: cleanText(item.label || item.title || ''),
+      value: cleanText(item.value || item.number || ''),
+      icon: cleanText(item.icon || 'sparkles'),
+    }))
+    .filter((item) => item.label && item.value);
 }
 
 function normalizeBreaks(items = [], allowEmpty = false) {

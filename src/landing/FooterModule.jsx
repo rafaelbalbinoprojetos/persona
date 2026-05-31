@@ -7,6 +7,7 @@ export function FooterModule({ config, theme }) {
   const professional = getFeaturedProfessional(config);
   const socialLinks = getSocialLinks(config);
   const copy = getFooterCopy(config);
+  const editorial = theme.key === 'dark-editorial';
 
   const navItems = [
     { label: copy.exploreServicesLabel, href: '#servicos' },
@@ -18,7 +19,7 @@ export function FooterModule({ config, theme }) {
   return (
     <footer className="relative overflow-hidden border-t border-[var(--preview-border)] bg-[var(--preview-bg)] py-20">
       <div className="pointer-events-none absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-[var(--preview-primary)]/50 to-transparent" />
-      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-[var(--preview-primary)]/10 blur-3xl" />
+      {!editorial && <div className="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-[var(--preview-primary)]/10 blur-3xl" />}
 
       <div className="section-shell">
         <div className="grid gap-12 lg:grid-cols-[1.2fr_0.8fr_0.8fr_1fr]">

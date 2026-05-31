@@ -832,6 +832,7 @@ function normalizeDraft(submission) {
   return {
     ...submission,
     payload: {
+      ...payload,
       businesses: {
         name: submission.business_name,
         segment: submission.segment,

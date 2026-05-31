@@ -9,19 +9,21 @@ export function FAQModule({ config, theme }) {
   const faqs = normalizeFaqs(config.faqs, config);
   const [openIndex, setOpenIndex] = useState(0);
   const isVenue = isVenueVertical(config.vertical);
+  const editorial = theme.key === 'dark-editorial';
 
   if (!faqs.length) return null;
 
   return (
-    <section id="faq" className="bg-[var(--preview-section)] py-28">
+    <section id="faq" className={`${editorial ? 'bg-[#F8FAFC] text-slate-950' : 'bg-[var(--preview-section)]'} py-28`}>
       <div className="section-shell">
         <SectionIntro
           eyebrow="FAQ"
           title={isVenue ? 'Clareza antes da reserva' : 'Clareza antes do primeiro contato'}
           description={isVenue ? 'Informações essenciais para decidir, consultar disponibilidade e reservar sem atrito.' : 'Respostas diretas em uma experiência leve, premium e sem atrito.'}
+          tone={editorial ? 'light' : 'default'}
         />
         <motion.div
-          className="mx-auto mt-14 grid max-w-4xl gap-4"
+          className="mx-auto mt-14 grid max-w-6xl gap-4 lg:grid-cols-2"
           variants={stagger}
           initial="hidden"
           whileInView="visible"
@@ -31,7 +33,9 @@ export function FAQModule({ config, theme }) {
             <motion.article
               key={`${faq.question}-${index}`}
               variants={reveal}
-              className={cardClass(theme, 'overflow-hidden shadow-[var(--preview-shadow)]')}
+              className={editorial
+                ? 'overflow-hidden border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]'
+                : cardClass(theme, 'overflow-hidden shadow-[var(--preview-shadow)]')}
               style={{ borderRadius: theme.radius }}
             >
               <button
@@ -57,7 +61,7 @@ export function FAQModule({ config, theme }) {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.32, ease: cinematicEase }}
                   >
-                    <p className="px-6 pb-6 pl-20 leading-7 text-[var(--preview-muted)]">{faq.answer}</p>
+                    <p className={`px-6 pb-6 pl-20 leading-7 ${editorial ? 'text-slate-600' : 'text-[var(--preview-muted)]'}`}>{faq.answer}</p>
                   </motion.div>
                 )}
               </AnimatePresence>

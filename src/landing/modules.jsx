@@ -10,6 +10,7 @@ export { CenteredState } from './CenteredState.jsx';
 export { ConversionModule } from './ConversionModule.jsx';
 export { FAQModule } from './FAQModule.jsx';
 export { FinalCTAModule } from './FinalCTAModule.jsx';
+export { EditorialHighlightModule } from './EditorialHighlightModule.jsx';
 export { FooterModule } from './FooterModule.jsx';
 export { GalleryModule } from './GalleryModule.jsx';
 export { HeaderModule } from './HeaderModule.jsx';
@@ -19,6 +20,7 @@ export { ServicesModule } from './ServicesModule.jsx';
 export { SignatureModule } from './SignatureModule.jsx';
 export { TestimonialsModule } from './TestimonialsModule.jsx';
 export { ThemeSettingsPanel } from './ThemeSettingsPanel.jsx';
+export { TrustStatsModule } from './TrustStatsModule.jsx';
 
 // ─── SimpleModule ─────────────────────────────────────────────────────────────
 // Componente auxiliar de placeholder — pequeno demais para arquivo próprio.

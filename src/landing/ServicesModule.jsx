@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ImagePlus, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowRight, ImagePlus, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getImageCandidates, getUnsupportedImageReason } from './imageUtils.js';
 import { getServiceEmotionalLine, getServicesIntroCopy } from './landingUtils.js';
@@ -17,14 +17,17 @@ export function ServicesModule({
 }) {
   const { services, preset } = config;
   const copy = getServicesIntroCopy(config);
+  const editorial = theme.key === 'dark-editorial';
+  const rangeReservation = config.conversion?.calendarMode === 'date_range';
 
   return (
-    <section id="servicos" className="bg-[var(--preview-bg)] py-28">
+    <section id="servicos" className={`${editorial ? 'bg-[#F8FAFC] text-slate-950' : 'bg-[var(--preview-bg)]'} py-28`}>
       <div className="section-shell">
-        <SectionIntro
-          eyebrow={preset.sectionLabels.services}
-          title={copy.title}
-          description={copy.description}
+          <SectionIntro
+            eyebrow={preset.sectionLabels.services}
+            title={copy.title}
+            description={copy.description}
+            tone={editorial ? 'light' : 'default'}
         />
         {editMode && (
           <div className="mt-8 flex justify-center">
@@ -54,7 +57,9 @@ export function ServicesModule({
               animate="visible"
               whileHover={{ y: -10, scale: 1.01 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className={cardClass(theme, 'group relative overflow-hidden shadow-[var(--preview-shadow)]')}
+              className={editorial
+                ? 'group relative overflow-hidden border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.14)]'
+                : cardClass(theme, 'group relative overflow-hidden shadow-[var(--preview-shadow)]')}
               style={{ borderRadius: theme.radius }}
             >
               {editMode && (
@@ -78,15 +83,17 @@ export function ServicesModule({
               />
               <div className="p-8">
                 <div className="mb-5 flex items-center justify-between gap-4">
-                  <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-[var(--preview-primary)]">
+                  <p className="text-xs font-extrabold uppercase text-[var(--preview-primary)]">
                     {copy.cardPrefix} {String(index + 1).padStart(2, '0')}
                   </p>
-                  <span className="rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 py-1 text-xs font-extrabold text-[var(--preview-muted)]">
-                    {service.duration || service.duration_minutes || 30} {copy.durationSuffix}
-                  </span>
+                  {!rangeReservation && (
+                    <span className="rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 py-1 text-xs font-extrabold text-[var(--preview-muted)]">
+                      {service.duration || service.duration_minutes || 30} {copy.durationSuffix}
+                    </span>
+                  )}
                 </div>
                 <h3
-                  className={`rounded-xl text-3xl font-black tracking-[-0.025em] outline-none ${
+                  className={`rounded-xl text-3xl font-black outline-none ${
                     editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-2 focus:py-1 focus:ring-[var(--preview-primary)]/25' : ''
                   }`}
                   contentEditable={editMode}
@@ -95,11 +102,11 @@ export function ServicesModule({
                 >
                   {service.name}
                 </h3>
-                <p className="mt-3 text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--preview-primary)]/80">
+                <p className={`mt-3 text-sm font-extrabold uppercase ${editorial ? 'text-violet-700' : 'text-[var(--preview-primary)]/80'}`}>
                   {getServiceEmotionalLine(config.vertical, index)}
                 </p>
                 <p
-                  className={`mt-5 rounded-xl leading-8 text-[var(--preview-muted)] outline-none ${
+                  className={`mt-5 rounded-xl leading-8 outline-none ${editorial ? 'text-slate-600' : 'text-[var(--preview-muted)]'} ${
                     editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-2 focus:py-1 focus:ring-[var(--preview-primary)]/25' : ''
                   }`}
                   contentEditable={editMode}
@@ -113,6 +120,10 @@ export function ServicesModule({
                     A partir de R$ {service.price}
                   </p>
                 )}
+                <a href="#agenda" className={`mt-7 inline-flex items-center gap-2 text-sm font-extrabold transition hover:gap-3 ${editorial ? 'text-violet-700' : 'text-[var(--preview-primary)]'}`}>
+                  {rangeReservation ? 'Consultar disponibilidade' : config.conversion?.buttonLabel || 'Saiba mais'}
+                  <ArrowRight size={16} />
+                </a>
               </div>
             </motion.article>
           ))}

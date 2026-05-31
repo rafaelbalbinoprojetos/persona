@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Quote, Star } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { getPublicTestimonialName, getTestimonialInitials } from './landingUtils.js';
-import { SectionIntro } from './LandingShared.jsx';
+import { reveal, SectionIntro, stagger } from './LandingShared.jsx';
 
 export function TestimonialsModule({ config, theme }) {
   const { submission, preset, services } = config;
   const [testimonials, setTestimonials] = useState([]);
   const [status, setStatus] = useState('loading');
+  const editorial = theme.key === 'dark-editorial';
 
   useEffect(() => {
     async function loadTestimonials() {
@@ -60,17 +62,24 @@ export function TestimonialsModule({ config, theme }) {
   }
 
   return (
-    <section id="depoimentos" className="bg-[var(--preview-bg)] py-24">
+    <section id="depoimentos" className={`${editorial ? 'bg-[#05070D]' : 'bg-[var(--preview-bg)]'} py-24`}>
       <div className="section-shell">
         <SectionIntro
           eyebrow="Depoimentos"
           title="Experiências que reforçam confiança"
           description="Avaliações publicadas pelo cliente, com autorização de uso e controle de status."
         />
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
+        <motion.div
+          className={`mt-12 grid gap-6 ${testimonials.length === 1 ? 'mx-auto max-w-2xl' : 'lg:grid-cols-3'}`}
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-80px' }}
+        >
           {testimonials.map((testimonial) => (
-            <article
+            <motion.article
               key={testimonial.id}
+              variants={reveal}
               className={cardClass(theme, 'group flex min-h-[320px] flex-col p-6 shadow-[var(--preview-shadow)] transition duration-300 hover:-translate-y-2')}
               style={{ borderRadius: theme.radius }}
             >
@@ -101,9 +110,9 @@ export function TestimonialsModule({ config, theme }) {
                   {testimonial.related_service || services[0]?.name || preset.label}
                 </p>
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

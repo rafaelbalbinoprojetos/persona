@@ -24,6 +24,7 @@ export function HeroModule({
   const nextAvailability = getNextAvailabilityLabel(availability);
   const socialLinks = getSocialLinks(config);
   const heroCopy = getHeroMicrocopy(config);
+  const editorial = theme.key === 'dark-editorial';
 
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
@@ -42,9 +43,11 @@ export function HeroModule({
 
   return (
     <section id="top" className="relative overflow-hidden bg-[var(--preview-section)] px-4 pb-8 pt-24 sm:px-6 lg:px-8">
-      <AnimatedMesh />
+      {!editorial && <AnimatedMesh />}
       <div
-        className="relative mx-auto min-h-[760px] max-w-[1500px] overflow-hidden shadow-[var(--preview-shadow)] sm:min-h-[820px] lg:min-h-[860px]"
+        className={`relative mx-auto max-w-[1500px] overflow-hidden shadow-[var(--preview-shadow)] ${
+          editorial ? 'min-h-[calc(100dvh-7rem)] sm:min-h-[820px] lg:min-h-[880px]' : 'min-h-[760px] sm:min-h-[820px] lg:min-h-[860px]'
+        }`}
         style={{ borderRadius: theme.heroRadius }}
         onMouseMove={handleHeroMouseMove}
         onMouseLeave={() => { pointerX.set(0); pointerY.set(0); }}
@@ -57,17 +60,17 @@ export function HeroModule({
           />
         )}
         <div className="absolute inset-0" style={{ background: theme.heroOverlay }} />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.18),transparent_28%),radial-gradient(circle_at_18%_64%,var(--preview-primary)_0,transparent_30%),linear-gradient(180deg,transparent_45%,var(--preview-bg)_112%)] opacity-30" />
-        <AtmosphericParticles />
+        <div className={`absolute inset-0 ${editorial ? 'bg-[linear-gradient(180deg,rgba(5,7,13,0.12),rgba(5,7,13,0.62)),radial-gradient(ellipse_at_center,transparent_35%,rgba(5,7,13,0.62)_100%)]' : 'bg-[radial-gradient(circle_at_72%_20%,rgba(255,255,255,0.18),transparent_28%),radial-gradient(circle_at_18%_64%,var(--preview-primary)_0,transparent_30%),linear-gradient(180deg,transparent_45%,var(--preview-bg)_112%)] opacity-30'}`} />
+        {!editorial && <AtmosphericParticles />}
         <motion.div
           aria-hidden="true"
-          className="absolute left-[39%] top-[18%] hidden h-60 w-60 rounded-full bg-white/20 blur-3xl lg:block"
+          className={`absolute left-[39%] top-[18%] hidden h-60 w-60 rounded-full bg-white/20 blur-3xl lg:block ${editorial ? 'opacity-0' : ''}`}
           style={{ x: glowX, y: glowY }}
           animate={{ y: [0, 22, 0], opacity: [0.25, 0.42, 0.25] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        <div className="relative z-10 flex min-h-[760px] flex-col justify-start px-6 pb-44 pt-20 sm:min-h-[820px] sm:px-10 sm:pt-24 lg:min-h-[860px] lg:px-16 lg:pt-28">
+        <div className={`relative z-10 flex flex-col justify-start px-6 pb-44 pt-20 sm:px-10 sm:pt-24 lg:px-16 lg:pt-28 ${editorial ? 'min-h-[calc(100dvh-7rem)] sm:min-h-[820px] lg:min-h-[880px]' : 'min-h-[760px] sm:min-h-[820px] lg:min-h-[860px]'}`}>
           <motion.div className="max-w-[720px]" variants={stagger} initial="hidden" animate="visible">
             <motion.span
               variants={reveal}
@@ -83,12 +86,12 @@ export function HeroModule({
                 {specialty}
               </span>
             </motion.span>
-            <motion.p variants={reveal} className="text-sm font-extrabold uppercase tracking-[0.28em] text-[var(--preview-primary)]">
+            <motion.p variants={reveal} className="text-sm font-extrabold uppercase text-[var(--preview-primary)]">
               {heroCopy.eyebrow}
             </motion.p>
             <motion.h1
               variants={reveal}
-              className={`mt-5 max-w-4xl rounded-2xl text-5xl font-black leading-[0.98] tracking-[-0.035em] outline-none sm:text-6xl lg:text-8xl ${
+              className={`mt-5 max-w-4xl rounded-2xl font-black leading-[0.98] outline-none ${editorial ? 'font-serif text-5xl sm:text-7xl lg:text-8xl' : 'text-5xl sm:text-6xl lg:text-8xl'} ${
                 editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
               }`}
               contentEditable={editMode}

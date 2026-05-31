@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { CheckCircle2 } from 'lucide-react';
 import { cardClass } from './theme.js';
 import { getFeaturedProfessional, getSignatureIntroCopy, getSignaturePillars } from './landingUtils.js';
 import { SectionIntro, reveal, stagger } from './LandingShared.jsx';
@@ -8,11 +9,12 @@ export function SignatureModule({ config, theme, editMode = false, onProfessiona
   const philosophy = professional.bio || config.preset.professionalBio;
   const pillars = getSignaturePillars(config.vertical);
   const copy = getSignatureIntroCopy(config);
+  const editorial = theme.key === 'dark-editorial';
 
   return (
-    <section id="assinatura" className="relative overflow-hidden bg-[var(--preview-section)] py-28">
+    <section id="assinatura" className={`relative overflow-hidden py-28 ${editorial ? 'bg-[#05070D]' : 'bg-[var(--preview-section)]'}`}>
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[var(--preview-bg)] to-transparent" />
-      <div className="pointer-events-none absolute right-[-10rem] top-20 h-96 w-96 rounded-full bg-[var(--preview-primary)]/10 blur-3xl" />
+      {!editorial && <div className="pointer-events-none absolute right-[-10rem] top-20 h-96 w-96 rounded-full bg-[var(--preview-primary)]/10 blur-3xl" />}
       <div className="section-shell">
         <motion.div
           className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end"
@@ -22,10 +24,10 @@ export function SignatureModule({ config, theme, editMode = false, onProfessiona
           viewport={{ once: true, margin: '-80px' }}
         >
           <motion.div variants={reveal}>
-            <p className="text-sm font-extrabold uppercase tracking-[0.24em] text-[var(--preview-primary)]">
+            <p className="text-sm font-extrabold uppercase text-[var(--preview-primary)]">
               {copy.eyebrow}
             </p>
-            <h2 className="mt-5 max-w-3xl text-4xl font-black leading-tight tracking-[-0.035em] sm:text-5xl lg:text-6xl">
+            <h2 className={`mt-5 max-w-3xl text-4xl font-black leading-tight sm:text-5xl lg:text-6xl ${editorial ? 'font-serif' : ''}`}>
               {copy.title}
             </h2>
           </motion.div>
@@ -51,8 +53,8 @@ export function SignatureModule({ config, theme, editMode = false, onProfessiona
                   key={pillar}
                   className="rounded-3xl border border-[var(--preview-border)] bg-[var(--preview-surface)]/70 p-4"
                 >
-                  <div className="mb-4 h-px w-10 bg-[var(--preview-primary)]" />
-                  <p className="text-sm font-extrabold uppercase tracking-[0.18em] text-[var(--preview-muted)]">
+                  <CheckCircle2 size={19} className="mb-4 text-[var(--preview-accent)]" />
+                  <p className="text-sm font-extrabold uppercase text-[var(--preview-muted)]">
                     {pillar}
                   </p>
                 </div>

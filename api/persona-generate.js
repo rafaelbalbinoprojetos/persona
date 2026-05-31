@@ -98,6 +98,8 @@ O JSON deve seguir exatamente esta estrutura:
 {
   "business": {"name":"","slug":"","segment":"","whatsapp":"","email":"","address":"","status":"trial"},
   "branding": {"professionalName":"","specialty":"","heroTitle":"","heroSubtitle":"","heroBadge":"","primaryColor":"","themeKey":"","heroImageUrl":"","ctaPrimary":"","ctaSecondary":"","tone":"","positioning":"","signatureTitle":"","signatureText":"","signatureTags":[]},
+  "trustStats": [{"label":"","value":"","icon":"star"}],
+  "editorialHighlight": {"eyebrow":"","title":"","description":"","benefits":[],"imageUrl":""},
   "services": [{"title":"","subtitle":"","description":"","durationMinutes":null,"price":null,"imageUrl":"","category":""}],
   "conversion": {"mode":"appointment","calendarMode":"time_slots","title":"","subtitle":"","buttonLabel":"","successMessage":""},
   "schedule": {"enabled":true,"days":["mon","tue","wed","thu","fri"],"startTime":"08:00","endTime":"18:00","intervalMinutes":30,"breaks":[]},
@@ -108,6 +110,8 @@ O JSON deve seguir exatamente esta estrutura:
 
 Regras:
 - Textos premium, curtos e sofisticados.
+- trustStats deve ter até 4 dados objetivos citados no briefing. Não invente números. Se não houver dados objetivos, retorne [].
+- editorialHighlight deve destacar diferenciais reais do briefing com até 4 benefícios curtos.
 - Evite frases genéricas como "soluções inovadoras", "qualidade e excelência", "referência no mercado".
 - Se depende de horário marcado, conversion.mode = "appointment".
 - Se depende de reserva de data/diária/turno, como sítio, hospedagem, salão de festas, estúdio, quadra ou espaço para eventos, conversion.mode = "appointment".
@@ -195,6 +199,14 @@ function buildFallbackConfig(prompt) {
       { title: isRental ? 'Fim de semana' : isTech ? 'Diagnóstico de processos' : 'Avaliação inicial', subtitle: '', description: isRental ? 'Reserva para descanso, lazer e encontros em família ou amigos.' : 'Primeira etapa para entender o contexto e orientar o melhor caminho.', durationMinutes: mode === 'appointment' ? 30 : null, price: null, imageUrl: '', category: '' },
       { title: isRental ? 'Eventos e celebrações' : isTech ? 'Projeto sob medida' : 'Atendimento personalizado', subtitle: '', description: isRental ? 'Uso do espaço para datas especiais, confraternizações e experiências privativas.' : 'Experiência desenhada de acordo com a necessidade do cliente.', durationMinutes: mode === 'appointment' ? 45 : null, price: null, imageUrl: '', category: '' },
     ],
+    trustStats: [],
+    editorialHighlight: {
+      eyebrow: isRental ? 'Ambientes e estrutura' : 'Experiência em detalhes',
+      title: isRental ? 'Cada detalhe pensado para receber bem.' : 'Uma jornada pensada para transmitir confiança.',
+      description: isRental ? 'Apresente estrutura, ambientes e diferenciais para tornar a decisão de reserva mais simples.' : 'Apresente diferenciais e cuidado com uma experiência clara e memorável.',
+      benefits: isRental ? ['Conforto', 'Privacidade', 'Estrutura completa', 'Reserva facilitada'] : ['Atendimento próximo', 'Processo claro', 'Cuidado nos detalhes', 'Experiência premium'],
+      imageUrl: '',
+    },
     conversion: {
       mode,
       calendarMode: usesDateRange ? 'date_range' : 'time_slots',

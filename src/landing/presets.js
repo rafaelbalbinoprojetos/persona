@@ -146,7 +146,9 @@ export const verticalPresets = {
 
 export const defaultEnabledModules = {
   hero: true,
+  trustStats: true,
   services: true,
+  editorialHighlight: true,
   schedule: true,
   testimonials: false,
   faq: false,
