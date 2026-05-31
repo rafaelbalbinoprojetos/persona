@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { Input } from './DashboardShared.jsx';
 import { ConversionModeSettings } from './ConversionModeSettings.jsx';
+import { detectVertical } from '../../landing/presets.js';
 
 const WEEKDAYS = [
   { label: 'Seg', value: 1 },
@@ -30,6 +31,8 @@ export function AgendaEditor({
   const dateBlocks = draft.payload.availability_date_blocks || [];
   const conversion = draft.payload.conversion || { mode: 'appointment' };
   const mode = conversion.mode || 'appointment';
+  const calendarMode = conversion.calendarMode || (detectVertical(draft.payload.businesses?.segment || draft.segment) === 'venue' ? 'date_range' : 'time_slots');
+  const usesDateRange = calendarMode === 'date_range';
   const template = rules[0] || { start_time: '08:00', end_time: '18:00', interval_minutes: 30 };
 
   return (
@@ -47,11 +50,42 @@ export function AgendaEditor({
 
       {(mode === 'appointment' || (mode === 'consultation' && conversion.showSchedule)) && (
         <>
+      <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+        <h2 className="text-xl font-extrabold">Tipo de calendário</h2>
+        <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
+          Use horários para consultas e turnos. Use período para hospedagens, sítios e reservas com uma ou mais datas.
+        </p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {[
+            { key: 'time_slots', label: 'Dia e horário', description: 'O visitante escolhe uma data e um horário disponível.' },
+            { key: 'date_range', label: 'Período com múltiplas datas', description: 'O visitante escolhe a data inicial e a data final da reserva.' },
+          ].map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => updateConversion('calendarMode', item.key)}
+              className={`rounded-3xl border p-4 text-left transition hover:-translate-y-0.5 ${
+                calendarMode === item.key
+                  ? 'border-brand-600 bg-brand-600 text-white shadow-glow'
+                  : 'border-slate-100 bg-white text-brand-900'
+              }`}
+            >
+              <span className="block text-sm font-extrabold">{item.label}</span>
+              <span className={`mt-2 block text-xs font-semibold leading-5 ${calendarMode === item.key ? 'text-white/75' : 'text-slate-500'}`}>
+                {item.description}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* ── Dias de atendimento ── */}
       <div className="rounded-[2rem] bg-[#fbfdff] p-5">
-        <h2 className="text-xl font-extrabold">Dias de atendimento</h2>
+        <h2 className="text-xl font-extrabold">{usesDateRange ? 'Dias disponíveis para reserva' : 'Dias de atendimento'}</h2>
         <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
-          Escolha os dias em que o cliente atende e configure o horário padrão.
+          {usesDateRange
+            ? 'Escolha os dias da semana em que novas reservas podem começar e continuar.'
+            : 'Escolha os dias em que o cliente atende e configure o horário padrão.'}
         </p>
 
         <div className="mt-5 grid grid-cols-4 gap-3 sm:grid-cols-7">
@@ -73,7 +107,7 @@ export function AgendaEditor({
           })}
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">
+        {!usesDateRange && <div className="mt-5 grid gap-4 sm:grid-cols-3">
           <Input
             label="Início"
             type="time"
@@ -98,11 +132,11 @@ export function AgendaEditor({
               ))}
             </select>
           </label>
-        </div>
+        </div>}
       </div>
 
       {/* ── Pausas e bloqueios ── */}
-      <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+      {!usesDateRange && <div className="rounded-[2rem] bg-[#fbfdff] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-extrabold">Pausas e bloqueios</h2>
@@ -182,15 +216,15 @@ export function AgendaEditor({
             </p>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* ── Feriados e folgas ── */}
       <div className="rounded-[2rem] bg-[#fbfdff] p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-extrabold">Feriados e folgas</h2>
+            <h2 className="text-xl font-extrabold">{usesDateRange ? 'Datas indisponíveis' : 'Feriados e folgas'}</h2>
             <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">
-              Bloqueie datas inteiras em que não haverá atendimento.
+              {usesDateRange ? 'Bloqueie datas que não podem fazer parte de uma reserva.' : 'Bloqueie datas inteiras em que não haverá atendimento.'}
             </p>
           </div>
           <button

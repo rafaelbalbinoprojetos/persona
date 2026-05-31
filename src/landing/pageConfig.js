@@ -113,6 +113,7 @@ function normalizeConversion(conversion = {}, preset, services = []) {
 
   return {
     mode,
+    calendarMode: conversion.calendarMode || conversion.calendar_mode || (isVenueAppointment ? 'date_range' : 'time_slots'),
     title: isVenueAppointment && genericAppointmentTitle ? fallback.title : rawTitle || fallback.title,
     subtitle: rawSubtitle || fallback.subtitle,
     buttonLabel: isVenueAppointment && genericAppointmentButton ? fallback.buttonLabel : rawButtonLabel || fallback.buttonLabel,

@@ -66,6 +66,8 @@ export default function DashboardPage() {
   // Gestão de agendamentos
   const [appointments, setAppointments] = useState([]);
   const [appointmentsStatus, setAppointmentsStatus] = useState({ type: 'idle', message: '' });
+  const [reservations, setReservations] = useState([]);
+  const [reservationsStatus, setReservationsStatus] = useState({ type: 'idle', message: '' });
   const [managementDate, setManagementDate] = useState(
     () => new Date().toISOString().slice(0, 10),
   );
@@ -102,6 +104,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!selectedSubmission?.slug) return;
     loadAppointments(selectedSubmission.slug);
+    loadReservations(selectedSubmission.slug);
     loadTestimonials(selectedSubmission.slug);
   }, [selectedSubmission?.slug]);
 
@@ -151,6 +154,28 @@ export default function DashboardPage() {
     setAppointmentsStatus({ type: 'success', message: '' });
   }
 
+  async function loadReservations(slug) {
+    if (!isSupabaseConfigured) return;
+    const { data, error } = await supabase
+      .from('reservation_requests')
+      .select('id, submission_slug, business_name, customer_name, customer_whatsapp, start_date, end_date, status, source, payload, created_at')
+      .eq('submission_slug', slug)
+      .order('start_date', { ascending: true });
+
+    if (error) {
+      setReservations([]);
+      setReservationsStatus({
+        type: 'error',
+        message: error.code === '42P01' || error.code === 'PGRST205'
+          ? 'Tabela de reservas por período ainda não instalada. Execute supabase/reservation_requests.sql.'
+          : error.message,
+      });
+      return;
+    }
+    setReservations(data || []);
+    setReservationsStatus({ type: 'success', message: '' });
+  }
+
   async function loadTestimonials(slug) {
     if (!isSupabaseConfigured) return;
     setTestimonialsStatus({ type: 'loading', message: 'Carregando depoimentos...' });
@@ -185,6 +210,16 @@ export default function DashboardPage() {
       current.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)),
     );
     setAppointmentsStatus({ type: 'success', message: 'Agendamento atualizado.' });
+  }
+
+  async function updateReservationStatus(id, nextStatus) {
+    setReservationsStatus({ type: 'saving', message: 'Atualizando reserva...' });
+    const { error } = await supabase.from('reservation_requests').update({ status: nextStatus }).eq('id', id);
+    if (error) { setReservationsStatus({ type: 'error', message: error.message }); return; }
+    setReservations((current) =>
+      current.map((item) => (item.id === id ? { ...item, status: nextStatus } : item)),
+    );
+    setReservationsStatus({ type: 'success', message: 'Reserva atualizada.' });
   }
 
   // ─── Ações de depoimentos ───────────────────────────────────────────────────
@@ -804,11 +839,17 @@ export default function DashboardPage() {
               {activeTab === 'management' && (
                 <ProfessionalManagement
                   appointments={appointments}
+                  reservations={reservations}
                   status={appointmentsStatus}
+                  reservationsStatus={reservationsStatus}
                   selectedDate={managementDate}
                   onDateChange={setManagementDate}
-                  onRefresh={() => loadAppointments(draft.slug)}
+                  onRefresh={() => {
+                    loadAppointments(draft.slug);
+                    loadReservations(draft.slug);
+                  }}
                   onUpdateStatus={updateAppointmentStatus}
+                  onUpdateReservationStatus={updateReservationStatus}
                 />
               )}
 

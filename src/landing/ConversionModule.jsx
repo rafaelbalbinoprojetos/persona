@@ -4,17 +4,18 @@ import { ArrowRight, BriefcaseBusiness, Mail, MessageCircle, Phone, Sparkles, Us
 import { cardClass } from './theme.js';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { ScheduleModule } from './ScheduleModule.jsx';
+import { ReservationPeriodModule } from './ReservationPeriodModule.jsx';
 import { SectionIntro, reveal } from './LandingShared.jsx';
 
 export function ConversionModule({ config, theme }) {
   const mode = config.conversion?.mode || 'appointment';
 
   if (mode === 'appointment') {
-    return <ScheduleModule config={config} theme={theme} />;
+    return <CalendarModule config={config} theme={theme} />;
   }
 
   if (mode === 'consultation' && config.conversion.showSchedule) {
-    return <ScheduleModule config={config} theme={theme} />;
+    return <CalendarModule config={config} theme={theme} />;
   }
 
   return (
@@ -29,6 +30,12 @@ export function ConversionModule({ config, theme }) {
       </div>
     </section>
   );
+}
+
+function CalendarModule({ config, theme }) {
+  return config.conversion?.calendarMode === 'date_range'
+    ? <ReservationPeriodModule config={config} theme={theme} />
+    : <ScheduleModule config={config} theme={theme} />;
 }
 
 function ConversionIntro({ config }) {

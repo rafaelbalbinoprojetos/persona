@@ -99,7 +99,7 @@ O JSON deve seguir exatamente esta estrutura:
   "business": {"name":"","slug":"","segment":"","whatsapp":"","email":"","address":"","status":"trial"},
   "branding": {"professionalName":"","specialty":"","heroTitle":"","heroSubtitle":"","heroBadge":"","primaryColor":"","themeKey":"","heroImageUrl":"","ctaPrimary":"","ctaSecondary":"","tone":"","positioning":"","signatureTitle":"","signatureText":"","signatureTags":[]},
   "services": [{"title":"","subtitle":"","description":"","durationMinutes":null,"price":null,"imageUrl":"","category":""}],
-  "conversion": {"mode":"appointment","title":"","subtitle":"","buttonLabel":"","successMessage":""},
+  "conversion": {"mode":"appointment","calendarMode":"time_slots","title":"","subtitle":"","buttonLabel":"","successMessage":""},
   "schedule": {"enabled":true,"days":["mon","tue","wed","thu","fri"],"startTime":"08:00","endTime":"18:00","intervalMinutes":30,"breaks":[]},
   "faq": [{"question":"","answer":""}],
   "social": {"instagram":"","tiktok":"","linkedin":"","facebook":"","youtube":"","website":""},
@@ -117,6 +117,8 @@ Regras:
 - Locação, temporada, eventos, hospedagem, sítios e espaços reserváveis: use segment relacionado ao caso, como "locação de sítio", "espaço para eventos", "hospedagem por temporada"; themeKey "warm-minimal", "minimal-white" ou "dark-luxury".
 - Para locais alugáveis, services deve listar ofertas/uso do espaço: "Fim de semana", "Diária para eventos", "Ensaio fotográfico", "Pacote com piscina", "Celebrações familiares", conforme o briefing.
 - Para locais alugáveis, conversion.title deve convidar a escolher data ou solicitar reserva, e buttonLabel deve ser "Solicitar reserva" ou similar.
+- Para hotéis, hospedagens, sítios, chácaras e locações com uma ou mais diárias, use conversion.calendarMode = "date_range" e disponibilize schedule.days para todos os dias da semana, salvo restrição explícita.
+- Para consultas, horários avulsos, quadras, estúdios e eventos por turno, use conversion.calendarMode = "time_slots".
 - Saude/odontologia: themeKey "soft-medical" ou "minimal-white".
 - Advocacia/consultoria executiva: "dark-luxury" ou "executive-black".
 - Tecnologia/desenvolvimento: "neo-corporate".
@@ -159,6 +161,7 @@ function buildFallbackConfig(prompt) {
   const isDental = /dent|odonto|sorriso|implante|clareamento/.test(lower);
   const isBeauty = /estetic|beleza|cabelo|barb|harmoniza/.test(lower);
   const isRental = /sitio|sítio|chacara|chácara|fazenda|temporada|alug|loca[cç][aã]o|reserva|hosped|pousada|casa de campo|sal[aã]o|evento|festa|quadra|est[uú]dio/.test(lower);
+  const usesDateRange = /sitio|sítio|chacara|chácara|fazenda|temporada|hosped|pousada|casa de campo|hotel|di[aá]ria|fim de semana/.test(lower);
   const mode = isRental || isDental || isBeauty ? 'appointment' : isLegal ? 'consultation' : isTech ? 'request' : 'lead';
   const segment = isRental ? 'locação e reservas' : isDental ? 'odontologia' : isLegal ? 'advocacia' : isTech ? 'desenvolvimento de sistemas' : isBeauty ? 'estética' : 'serviços profissionais';
   const name = isRental ? 'Espaço para Reservas' : isLegal ? 'Profissional Jurídico' : isTech ? 'Especialista em Sistemas' : isDental ? 'Profissional de Odontologia' : 'Profissional Persona';
@@ -194,12 +197,13 @@ function buildFallbackConfig(prompt) {
     ],
     conversion: {
       mode,
+      calendarMode: usesDateRange ? 'date_range' : 'time_slots',
       title: isRental ? 'Escolha a data da reserva' : defaultConversionTitle(mode),
       subtitle: isRental ? 'Envie a data desejada e detalhes da reserva para confirmarmos disponibilidade.' : 'Envie suas informações para que o profissional avalie o melhor próximo passo.',
       buttonLabel: isRental ? 'Solicitar reserva' : defaultButton(mode),
       successMessage: 'Solicitação enviada com sucesso. Em breve entraremos em contato.',
     },
-    schedule: { enabled: mode === 'appointment', days: ['mon', 'tue', 'wed', 'thu', 'fri'], startTime: '08:00', endTime: '18:00', intervalMinutes: 30, breaks: [] },
+    schedule: { enabled: mode === 'appointment', days: isRental ? ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] : ['mon', 'tue', 'wed', 'thu', 'fri'], startTime: '08:00', endTime: '18:00', intervalMinutes: 30, breaks: [] },
     faq: [
       { question: isRental ? 'Como funciona a reserva?' : 'Como funciona o primeiro contato?', answer: isRental ? 'Você envia a data desejada e as informações principais. Em seguida confirmamos disponibilidade e próximos passos.' : 'Você envia suas informações pela página e o profissional avalia o melhor próximo passo.' },
       { question: 'Posso ajustar as informações depois?', answer: 'Sim. Tudo pode ser revisado e editado no painel antes da publicação.' },

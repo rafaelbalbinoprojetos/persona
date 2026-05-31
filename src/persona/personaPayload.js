@@ -53,6 +53,7 @@ export function normalizePersonaPayload(raw = {}) {
     services: normalizeServices(raw.services, segment),
     conversion: {
       mode,
+      calendarMode: cleanText(conversion.calendarMode || (isVenueSegment(segment) ? 'date_range' : 'time_slots')),
       title: cleanText(conversion.title || defaultConversionCopy(mode, segment).title),
       subtitle: cleanText(conversion.subtitle || defaultConversionCopy(mode, segment).subtitle),
       buttonLabel: cleanText(conversion.buttonLabel || defaultConversionCopy(mode, segment).buttonLabel),
@@ -62,11 +63,11 @@ export function normalizePersonaPayload(raw = {}) {
     },
     schedule: {
       enabled: schedule.enabled !== false,
-      days: normalizeScheduleDays(schedule.days),
+      days: normalizeScheduleDays(schedule.days, isVenueSegment(segment) ? [0, 1, 2, 3, 4, 5, 6] : undefined),
       startTime: normalizeTime(schedule.startTime, '08:00'),
       endTime: normalizeTime(schedule.endTime, '18:00'),
       intervalMinutes: Number(schedule.intervalMinutes) || 30,
-      breaks: normalizeBreaks(schedule.breaks),
+      breaks: normalizeBreaks(schedule.breaks, isVenueSegment(segment)),
     },
     faq: normalizeFaq(raw.faq),
     social: {
@@ -227,8 +228,9 @@ function normalizeFaq(items = []) {
     .filter((item) => item.question && item.answer);
 }
 
-function normalizeBreaks(items = []) {
+function normalizeBreaks(items = [], allowEmpty = false) {
   if (!Array.isArray(items) || !items.length) {
+    if (allowEmpty) return [];
     return [{ days: [1, 2, 3, 4, 5], startTime: '12:00', endTime: '13:00', reason: 'Almoço' }];
   }
 
@@ -240,15 +242,15 @@ function normalizeBreaks(items = []) {
   }));
 }
 
-function normalizeScheduleDays(days) {
-  if (!Array.isArray(days) || !days.length) return [1, 2, 3, 4, 5];
+function normalizeScheduleDays(days, fallback = [1, 2, 3, 4, 5]) {
+  if (!Array.isArray(days) || !days.length) return fallback;
   const result = days
     .map((day) => {
       if (typeof day === 'number') return day;
       return weekdayMap[String(day).toLowerCase()] ?? null;
     })
     .filter((day) => Number.isInteger(day) && day >= 0 && day <= 6);
-  return result.length ? [...new Set(result)].sort((a, b) => a - b) : [1, 2, 3, 4, 5];
+  return result.length ? [...new Set(result)].sort((a, b) => a - b) : fallback;
 }
 
 function normalizeConversionMode(mode, segment) {

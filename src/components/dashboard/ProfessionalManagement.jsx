@@ -13,11 +13,14 @@ import { EmptyState } from './DashboardShared.jsx';
 
 export function ProfessionalManagement({
   appointments,
+  reservations = [],
   status,
+  reservationsStatus = { type: 'idle', message: '' },
   selectedDate,
   onDateChange,
   onRefresh,
   onUpdateStatus,
+  onUpdateReservationStatus,
 }) {
   const activeAppointments = appointments.filter((item) => item.status !== 'cancelled');
   const dayAppointments = appointments
@@ -29,6 +32,7 @@ export function ProfessionalManagement({
   const noShowRisk = dayAppointments.filter((item) => item.status === 'pending').length;
   const reasonData = buildChartData(appointments, getAppointmentReason);
   const statusData = buildChartData(appointments, (item) => appointmentStatusLabel(item.status));
+  const activeReservations = reservations.filter((item) => item.status !== 'cancelled');
 
   const reasonOption = {
     tooltip: { trigger: 'item' },
@@ -75,6 +79,61 @@ export function ProfessionalManagement({
         <ManagementMetric label="Pendentes" value={pending} Icon={Clock3} tone="amber" />
         <ManagementMetric label="Confirmados" value={confirmed} Icon={CheckCircle2} tone="green" />
         <ManagementMetric label="Concluídos" value={completed} Icon={UserRound} tone="violet" />
+      </div>
+
+      <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-extrabold">Reservas por período</h2>
+            <p className="mt-1 text-sm font-semibold text-slate-500">
+              Estadias, locações e eventos com uma ou mais datas selecionadas.
+            </p>
+          </div>
+          <p className="rounded-full bg-brand-50 px-4 py-2 text-sm font-extrabold text-brand-700">
+            {activeReservations.length} ativa(s)
+          </p>
+        </div>
+
+        {reservationsStatus.message && (
+          <p className={`mt-4 rounded-2xl p-4 text-sm font-bold ${
+            reservationsStatus.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-brand-50 text-brand-700'
+          }`}>
+            {reservationsStatus.message}
+          </p>
+        )}
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {reservations.length
+            ? reservations.map((reservation) => (
+              <article key={reservation.id} className="rounded-3xl bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-extrabold uppercase text-brand-600">Período reservado</p>
+                    <p className="mt-2 text-lg font-extrabold">
+                      {formatDate(reservation.start_date)} até {formatDate(reservation.end_date)}
+                    </p>
+                  </div>
+                  <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${statusClass(reservation.status)}`}>
+                    {appointmentStatusLabel(reservation.status)}
+                  </span>
+                </div>
+                <h3 className="mt-4 text-lg font-extrabold">{reservation.customer_name}</h3>
+                <p className="mt-2 text-sm font-bold text-slate-500">WhatsApp: {reservation.customer_whatsapp}</p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                  Detalhes: <span className="font-extrabold text-brand-900">{reservation.payload?.details || 'Não informado'}</span>
+                </p>
+                <div className="mt-4 flex gap-2">
+                  <button onClick={() => onUpdateReservationStatus(reservation.id, 'confirmed')} disabled={reservation.status === 'confirmed'} className="pill-button bg-emerald-50 px-4 py-2 text-emerald-600 disabled:opacity-35">
+                    <CheckCircle2 size={17} /> Confirmar
+                  </button>
+                  <button onClick={() => onUpdateReservationStatus(reservation.id, 'cancelled')} disabled={reservation.status === 'cancelled'} className="pill-button bg-red-50 px-4 py-2 text-red-500 disabled:opacity-35">
+                    <XCircle size={17} /> Cancelar
+                  </button>
+                </div>
+              </article>
+            ))
+            : <div className="lg:col-span-2"><EmptyState text="Nenhuma reserva por período recebida." /></div>}
+        </div>
       </div>
 
       <div className="grid gap-6 2xl:grid-cols-[minmax(720px,1.35fr)_minmax(520px,0.85fr)]">
@@ -301,4 +360,9 @@ function buildChartData(items, getKey) {
 function percentage(part, total) {
   if (!total) return 0;
   return Math.round((part / total) * 100);
+}
+
+function formatDate(value) {
+  if (!value) return '';
+  return new Intl.DateTimeFormat('pt-BR').format(new Date(`${value}T12:00:00`));
 }
