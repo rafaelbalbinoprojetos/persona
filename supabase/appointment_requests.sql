@@ -68,34 +68,62 @@ drop policy if exists "Public can update appointment requests for management MVP
 drop policy if exists "Authenticated can read appointment requests" on public.appointment_requests;
 drop policy if exists "Authenticated can update appointment requests" on public.appointment_requests;
 
-create policy "Public can create appointment requests"
+drop policy if exists "Anon can create appointment requests" on public.appointment_requests;
+drop policy if exists "Authenticated owners can read own appointment requests" on public.appointment_requests;
+drop policy if exists "Authenticated owners can update own appointment requests" on public.appointment_requests;
+
+-- Insercao anonima apenas para paginas publicaveis existentes.
+create policy "Anon can create appointment requests"
 on public.appointment_requests for insert
-with check (status = 'pending' and source = 'preview_landing');
+to anon
+with check (
+  status = 'pending'
+  and source = 'preview_landing'
+  and exists (
+    select 1
+    from public.onboarding_submissions os
+    where os.slug = submission_slug
+      and os.status in ('preview', 'published')
+  )
+);
 
--- MVP sem login: permite o dashboard local listar e atualizar a agenda.
--- Em producao, substituir por policies authenticated vinculadas ao profissional/cliente.
-create policy "Public can read appointment requests for management MVP"
-on public.appointment_requests for select
-using (true);
-
-create policy "Public can update appointment requests for management MVP"
-on public.appointment_requests for update
-using (true)
-with check (status in ('pending', 'confirmed', 'cancelled', 'completed'));
-
-create policy "Authenticated can read appointment requests"
+-- Leitura e atualizacao restritas ao dono da pagina (slug e unico).
+create policy "Authenticated owners can read own appointment requests"
 on public.appointment_requests for select
 to authenticated
-using (true);
+using (
+  exists (
+    select 1
+    from public.onboarding_submissions os
+    where os.slug = submission_slug
+      and os.owner_id = auth.uid()
+  )
+);
 
-create policy "Authenticated can update appointment requests"
+create policy "Authenticated owners can update own appointment requests"
 on public.appointment_requests for update
 to authenticated
-using (true)
-with check (status in ('pending', 'confirmed', 'cancelled', 'completed'));
+using (
+  exists (
+    select 1
+    from public.onboarding_submissions os
+    where os.slug = submission_slug
+      and os.owner_id = auth.uid()
+  )
+)
+with check (
+  status in ('pending', 'confirmed', 'cancelled', 'completed')
+  and exists (
+    select 1
+    from public.onboarding_submissions os
+    where os.slug = submission_slug
+      and os.owner_id = auth.uid()
+  )
+);
 
 grant usage on schema public to anon, authenticated;
-grant select, insert, update on public.appointment_requests to anon, authenticated;
+revoke all on public.appointment_requests from anon, authenticated;
+grant insert on public.appointment_requests to anon;
 grant select, update on public.appointment_requests to authenticated;
 grant select on public.public_appointment_slots to anon, authenticated;
 

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle, ArrowRight, Bot, CheckCircle2, Loader2, RefreshCcw, Sparkles, WandSparkles } from 'lucide-react';
 import { mergePersonaWithDefaults, normalizePersonaPayload, validatePersonaPayload } from './personaPayload.js';
+import { supabase } from '../lib/supabaseClient.js';
 
 const examples = [
   'Sou dentista em Contagem e quero divulgar clareamento, implantes e limpeza com uma página premium para transmitir confiança e permitir agendamentos.',
@@ -31,12 +32,28 @@ export function PersonaOnboarding({ initialForm, onApply, onManual }) {
     setValidation(null);
 
     try {
+      const { data: sessionData } = supabase
+        ? await supabase.auth.getSession()
+        : { data: null };
+      const accessToken = sessionData?.session?.access_token;
+      if (!accessToken) {
+        setState('error');
+        setMessage('Faça login novamente para gerar a página com IA.');
+        return;
+      }
+
       const response = await fetch('/api/persona-generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ prompt: trimmedPrompt }),
       });
       const data = await response.json().catch(() => ({}));
+      if (response.status === 401 || response.status === 429) {
+        throw new Error(data.error || 'Não foi possível gerar agora. Tente novamente em alguns minutos.');
+      }
       if (!response.ok) {
         if (data.config) {
           const normalizedFallback = normalizePersonaPayload(data.config);

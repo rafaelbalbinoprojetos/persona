@@ -38,6 +38,8 @@ on public.landing_testimonials (submission_slug);
 create index if not exists landing_testimonials_public_idx
 on public.landing_testimonials (submission_slug, status, featured, created_at desc);
 
+drop trigger if exists set_landing_testimonials_updated_at on public.landing_testimonials;
+
 create trigger set_landing_testimonials_updated_at
 before update on public.landing_testimonials
 for each row execute function public.set_updated_at();

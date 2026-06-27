@@ -273,9 +273,13 @@ export default function OnboardingPage() {
       });
 
     if (error) {
+      const isSlugTaken =
+        error.code === '23505' || /onboarding_submissions_slug_unique/.test(error.message || '');
       setSaveState({
         status: 'error',
-        message: error.message,
+        message: isSlugTaken
+          ? `O endereço "${form.slug}" já está em uso. Escolha outro slug para a página (por exemplo: ${form.slug}-${new Date().getFullYear()}).`
+          : error.message,
       });
       return;
     }
@@ -738,8 +742,13 @@ function buildPayload(form) {
       editorialHighlight: true,
       professionals: false,
       schedule: true,
-      testimonials: false,
-      faq: form.faqs.length > 0,
+      // Liga depoimentos: a seção se auto-oculta para visitantes quando não
+      // há depoimentos autorizados, e passa a exibir os reais sem o dono
+      // precisar habilitar manualmente nas configurações.
+      testimonials: true,
+      // Liga FAQ sempre: há fallback de perguntas por vertical quando o
+      // briefing não trouxer nenhuma.
+      faq: true,
       gallery: false,
       location: true,
       finalCta: true,

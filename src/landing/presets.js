@@ -150,8 +150,13 @@ export const defaultEnabledModules = {
   services: true,
   editorialHighlight: true,
   schedule: true,
-  testimonials: false,
-  faq: false,
+  // testimonials liga por padrão: o módulo se auto-oculta quando não há
+  // depoimentos reais autorizados, então visitantes só veem dados verdadeiros.
+  // Antes, com false, depoimentos cadastrados nunca apareciam ao público.
+  testimonials: true,
+  // faq liga por padrão: há fallback de perguntas frequentes por vertical,
+  // então a seção sempre nasce preenchida (e editável pelo dono).
+  faq: true,
   gallery: false,
   location: true,
   finalCta: true,

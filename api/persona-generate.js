@@ -1,8 +1,82 @@
 const MAX_PROMPT_LENGTH = 2200;
 
+// Rate limit em memória por instância serverless.
+// Limita rajadas de abuso; instâncias frias zeram o contador, então o
+// teto real pode ser um pouco maior. Para limite global rígido, usar
+// Upstash Redis ou Vercel KV no futuro.
+const RATE_LIMIT_MAX = 8; // chamadas
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // por 10 minutos
+const rateLimitBuckets = new Map();
+
+function isRateLimited(userId) {
+  const now = Date.now();
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const timestamps = (rateLimitBuckets.get(userId) || []).filter((t) => t > windowStart);
+  if (timestamps.length >= RATE_LIMIT_MAX) {
+    rateLimitBuckets.set(userId, timestamps);
+    return true;
+  }
+  timestamps.push(now);
+  rateLimitBuckets.set(userId, timestamps);
+  if (rateLimitBuckets.size > 5000) rateLimitBuckets.clear();
+  return false;
+}
+
+async function getAuthenticatedUser(request) {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return { error: 'config' };
+  }
+
+  const authHeader = request.headers?.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+  if (!token) {
+    return { error: 'missing' };
+  }
+
+  try {
+    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: {
+        apikey: supabaseAnonKey,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!userResponse.ok) {
+      return { error: 'invalid' };
+    }
+    const user = await userResponse.json();
+    if (!user?.id) {
+      return { error: 'invalid' };
+    }
+    return { user };
+  } catch (error) {
+    console.error('Persona auth error:', error);
+    return { error: 'invalid' };
+  }
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
     return response.status(405).json({ error: 'Método não permitido.' });
+  }
+
+  const auth = await getAuthenticatedUser(request);
+  if (auth.error === 'config') {
+    return response.status(500).json({
+      error: 'SUPABASE_URL e SUPABASE_ANON_KEY precisam estar configuradas no ambiente da Vercel.',
+    });
+  }
+  if (auth.error) {
+    return response.status(401).json({
+      error: 'Faça login para gerar a página com IA.',
+    });
+  }
+
+  if (isRateLimited(auth.user.id)) {
+    return response.status(429).json({
+      error: 'Você gerou muitas páginas em pouco tempo. Aguarde alguns minutos e tente novamente.',
+    });
   }
 
   const apiKey = process.env.PERSONA;
@@ -111,8 +185,12 @@ O JSON deve seguir exatamente esta estrutura:
 Regras:
 - Textos premium, curtos e sofisticados.
 - trustStats deve ter até 4 dados objetivos citados no briefing. Não invente números. Se não houver dados objetivos, retorne [].
-- editorialHighlight deve destacar diferenciais reais do briefing com até 4 benefícios curtos.
+- editorialHighlight é OBRIGATÓRIO e deve sempre vir preenchido: eyebrow curto, title com uma frase de diferencial, description de 1 a 2 frases e 3 a 4 benefits curtos baseados no briefing (sem inventar dados objetivos).
+- faq deve conter de 4 a 6 perguntas REAIS e específicas do segmento/briefing (ex.: como funciona o agendamento, formas de pagamento, primeira consulta, localização, prazos), com respostas curtas e úteis. Nunca devolva faq vazio.
+- services deve ter de 3 a 6 itens, cada um com description de 1 frase concreta (o que é e o benefício), evitando texto genérico.
+- NÃO invente depoimentos de clientes, nomes, avaliações ou fotos. A prova social é cadastrada separadamente pelo dono.
 - Evite frases genéricas como "soluções inovadoras", "qualidade e excelência", "referência no mercado".
+- Escreva em português do Brasil com acentuação correta em todos os textos (exceto o slug).
 - Se depende de horário marcado, conversion.mode = "appointment".
 - Se depende de reserva de data/diária/turno, como sítio, hospedagem, salão de festas, estúdio, quadra ou espaço para eventos, conversion.mode = "appointment".
 - Se vende projeto/orçamento, conversion.mode = "request".

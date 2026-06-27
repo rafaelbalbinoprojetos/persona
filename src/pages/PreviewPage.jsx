@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { buildPageConfigFromOnboarding } from '../landing/pageConfig.js';
 import { themeToCssVars } from '../landing/theme.js';
+import { applyPageSeo, buildSeoFromConfig } from '../landing/seo.js';
 import {
   CenteredState,
   ConversionModule,
@@ -86,6 +87,12 @@ function PreviewLanding({ submission }) {
   const modules = config.enabledModules;
   const editorial = config.theme.key === 'dark-editorial';
   const canEdit = Boolean(session?.user?.id && localSubmission.owner_id && session.user.id === localSubmission.owner_id);
+
+  // SEO dinâmico: atualiza título e meta tags para humanos e Google.
+  // (Preview de link em redes sem JS é tratado pelo middleware.js na Vercel.)
+  useEffect(() => {
+    applyPageSeo(buildSeoFromConfig(config));
+  }, [config]);
 
   useEffect(() => {
     let active = true;
