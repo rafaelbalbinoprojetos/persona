@@ -3,6 +3,7 @@ import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
 import { buildPageConfigFromOnboarding } from '../landing/pageConfig.js';
 import { themeToCssVars } from '../landing/theme.js';
 import { applyPageSeo, buildSeoFromConfig } from '../landing/seo.js';
+import { SubscribeModal } from '../components/SubscribeModal.jsx';
 import {
   CenteredState,
   ConversionModule,
@@ -93,6 +94,7 @@ function PreviewLanding({ submission, isLive = true }) {
   const [session, setSession] = useState(null);
   const [sessionChecked, setSessionChecked] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
   const [themeKey, setThemeKey] = useState(storedTheme || '');
   const [editStatus, setEditStatus] = useState({ type: 'idle', message: '' });
   const config = useMemo(() => buildPageConfigFromOnboarding(localSubmission, themeKey), [localSubmission, themeKey]);
@@ -347,14 +349,21 @@ function PreviewLanding({ submission, isLive = true }) {
       {!isLive && canEdit && (
         <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-3 bg-amber-500 px-4 py-3 text-center text-sm font-bold text-amber-950">
           <span>Seu período de teste terminou — sua página está fora do ar para visitantes.</span>
-          <a
-            href={`/dashboard?slug=${encodeURIComponent(localSubmission.slug)}`}
+          <button
+            type="button"
+            onClick={() => setSubscribeOpen(true)}
             className="rounded-full bg-amber-950 px-4 py-1.5 font-extrabold text-amber-50"
           >
             Assinar para publicar
-          </a>
+          </button>
         </div>
       )}
+
+      <SubscribeModal
+        open={subscribeOpen}
+        onClose={() => setSubscribeOpen(false)}
+        accessToken={session?.access_token}
+      />
       <HeaderModule
         config={config}
         theme={config.theme}
