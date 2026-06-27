@@ -25,6 +25,8 @@ export default function PreviewPage() {
   const [submission, setSubmission] = useState(null);
   const [status, setStatus] = useState('loading');
   const [errorMessage, setErrorMessage] = useState('');
+  // Default true = "fail-open": se a checagem falhar, a página continua no ar.
+  const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
     async function loadSubmission() {
@@ -54,6 +56,16 @@ export default function PreviewPage() {
       }
 
       setSubmission(data);
+
+      // Muro de publicação: pergunta ao backend se a página deve ficar no ar
+      // (trial vigente ou assinatura ativa). Falha = mantém no ar (fail-open).
+      try {
+        const { data: liveData } = await supabase.rpc('page_is_live', { target_slug: slug });
+        if (typeof liveData === 'boolean') setIsLive(liveData);
+      } catch {
+        // mantém isLive = true
+      }
+
       setStatus('ready');
     }
 
@@ -72,13 +84,14 @@ export default function PreviewPage() {
     return <CenteredState title="Não foi possível carregar" description={errorMessage} />;
   }
 
-  return <PreviewLanding submission={submission} />;
+  return <PreviewLanding submission={submission} isLive={isLive} />;
 }
 
-function PreviewLanding({ submission }) {
+function PreviewLanding({ submission, isLive = true }) {
   const storedTheme = localStorage.getItem(`preview-theme:${submission.slug}`);
   const [localSubmission, setLocalSubmission] = useState(submission);
   const [session, setSession] = useState(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [themeKey, setThemeKey] = useState(storedTheme || '');
   const [editStatus, setEditStatus] = useState({ type: 'idle', message: '' });
@@ -97,7 +110,10 @@ function PreviewLanding({ submission }) {
   useEffect(() => {
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
-      if (active) setSession(data.session);
+      if (active) {
+        setSession(data.session);
+        setSessionChecked(true);
+      }
     });
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
@@ -308,8 +324,37 @@ function PreviewLanding({ submission }) {
     window.location.href = '/';
   }
 
+  // Muro de publicação: quando a página não está "no ar" (trial expirado e
+  // sem assinatura), visitantes veem um aviso e o dono vê a página com um
+  // banner para assinar. Espera a sessão ser verificada para não piscar a
+  // tela errada para o dono.
+  if (!isLive) {
+    if (!sessionChecked) {
+      return <CenteredState title="Carregando" description="Verificando a disponibilidade da página." />;
+    }
+    if (!canEdit) {
+      return (
+        <CenteredState
+          title="Página temporariamente indisponível"
+          description="Esta página não está publicada no momento. Tente novamente mais tarde."
+        />
+      );
+    }
+  }
+
   return (
     <div className="min-h-screen overflow-hidden bg-[var(--preview-bg)] text-[var(--preview-text)]" style={themeStyle}>
+      {!isLive && canEdit && (
+        <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-3 bg-amber-500 px-4 py-3 text-center text-sm font-bold text-amber-950">
+          <span>Seu período de teste terminou — sua página está fora do ar para visitantes.</span>
+          <a
+            href={`/dashboard?slug=${encodeURIComponent(localSubmission.slug)}`}
+            className="rounded-full bg-amber-950 px-4 py-1.5 font-extrabold text-amber-50"
+          >
+            Assinar para publicar
+          </a>
+        </div>
+      )}
       <HeaderModule
         config={config}
         theme={config.theme}

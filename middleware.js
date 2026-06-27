@@ -73,6 +73,11 @@ export default async function middleware(request) {
       branding.hero_title ||
       `Conheça ${name} e agende diretamente pelo site.`;
     const image = row.hero_image_url || branding.hero_image_url || '';
+    const imageType = /\.png(\?|$)/i.test(image)
+      ? 'image/png'
+      : /\.webp(\?|$)/i.test(image)
+      ? 'image/webp'
+      : 'image/jpeg';
     const pageUrl = url.href;
 
     const html = `<!doctype html>
@@ -89,7 +94,12 @@ export default async function middleware(request) {
 <meta property="og:title" content="${escapeHtml(title)}" />
 <meta property="og:description" content="${escapeHtml(description)}" />
 <meta property="og:url" content="${escapeHtml(pageUrl)}" />
-${image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : ''}
+${image ? `<meta property="og:image" content="${escapeHtml(image)}" />
+<meta property="og:image:secure_url" content="${escapeHtml(image)}" />
+<meta property="og:image:type" content="${imageType}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="${escapeHtml(title)}" />` : ''}
 <meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}" />
 <meta name="twitter:title" content="${escapeHtml(title)}" />
 <meta name="twitter:description" content="${escapeHtml(description)}" />
