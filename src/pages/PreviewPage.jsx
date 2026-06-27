@@ -347,7 +347,7 @@ function PreviewLanding({ submission, isLive = true }) {
   return (
     <div className="min-h-screen overflow-hidden bg-[var(--preview-bg)] text-[var(--preview-text)]" style={themeStyle}>
       {!isLive && canEdit && (
-        <div className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-3 bg-amber-500 px-4 py-3 text-center text-sm font-bold text-amber-950">
+        <div className="fixed inset-x-0 bottom-0 z-[60] flex flex-wrap items-center justify-center gap-3 bg-amber-500 px-4 py-3 text-center text-sm font-bold text-amber-950 shadow-[0_-6px_24px_rgba(0,0,0,0.18)]">
           <span>Seu período de teste terminou — sua página está fora do ar para visitantes.</span>
           <button
             type="button"
