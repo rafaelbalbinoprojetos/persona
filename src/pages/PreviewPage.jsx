@@ -95,6 +95,8 @@ function PreviewLanding({ submission, isLive = true }) {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [subscribeOpen, setSubscribeOpen] = useState(false);
+  const [account, setAccount] = useState(null);
+  const [trialBarHidden, setTrialBarHidden] = useState(false);
   const [themeKey, setThemeKey] = useState(storedTheme || '');
   const [editStatus, setEditStatus] = useState({ type: 'idle', message: '' });
   const config = useMemo(() => buildPageConfigFromOnboarding(localSubmission, themeKey), [localSubmission, themeKey]);
@@ -129,6 +131,24 @@ function PreviewLanding({ submission, isLive = true }) {
   useEffect(() => {
     localStorage.setItem(`preview-theme:${localSubmission.slug}`, config.theme.key);
   }, [config.theme.key, localSubmission.slug]);
+
+  // Busca a conta do dono (status do plano/trial) para mostrar o aviso de
+  // assinatura. RLS permite que o dono leia apenas a própria conta.
+  useEffect(() => {
+    if (!canEdit || !session?.user?.id) return undefined;
+    let active = true;
+    supabase
+      .from('accounts')
+      .select('status, plan, trial_ends_at')
+      .eq('owner_id', session.user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (active && data) setAccount(data);
+      });
+    return () => {
+      active = false;
+    };
+  }, [canEdit, session?.user?.id]);
 
   function handleThemeSelect(nextThemeKey) {
     setThemeKey(nextThemeKey);
@@ -326,6 +346,14 @@ function PreviewLanding({ submission, isLive = true }) {
     window.location.href = '/';
   }
 
+  // Dias restantes do período de teste (para o aviso ao dono).
+  const trialDaysLeft = account?.trial_ends_at
+    ? Math.ceil((new Date(account.trial_ends_at).getTime() - Date.now()) / 86400000)
+    : null;
+  const isTrialing = Boolean(
+    account && account.status === 'trialing' && trialDaysLeft !== null && trialDaysLeft > 0,
+  );
+
   // Muro de publicação: quando a página não está "no ar" (trial expirado e
   // sem assinatura), visitantes veem um aviso e o dono vê a página com um
   // banner para assinar. Espera a sessão ser verificada para não piscar a
@@ -355,6 +383,29 @@ function PreviewLanding({ submission, isLive = true }) {
             className="rounded-full bg-amber-950 px-4 py-1.5 font-extrabold text-amber-50"
           >
             Assinar para publicar
+          </button>
+        </div>
+      )}
+
+      {isLive && canEdit && isTrialing && !trialBarHidden && (
+        <div className="fixed inset-x-0 bottom-0 z-[60] flex flex-wrap items-center justify-center gap-3 bg-violet-600 px-4 py-2.5 text-center text-sm font-bold text-white shadow-[0_-6px_24px_rgba(0,0,0,0.18)]">
+          <span>
+            Período de teste: {trialDaysLeft} {trialDaysLeft === 1 ? 'dia restante' : 'dias restantes'}.
+          </span>
+          <button
+            type="button"
+            onClick={() => setSubscribeOpen(true)}
+            className="rounded-full bg-white px-4 py-1.5 font-extrabold text-violet-700"
+          >
+            Assinar agora
+          </button>
+          <button
+            type="button"
+            onClick={() => setTrialBarHidden(true)}
+            aria-label="Fechar aviso"
+            className="ml-1 text-lg leading-none text-white/80 hover:text-white"
+          >
+            ×
           </button>
         </div>
       )}
