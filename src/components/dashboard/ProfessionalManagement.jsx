@@ -24,6 +24,7 @@ export function ProfessionalManagement({
   onUpdateStatus,
   onUpdateReservationStatus,
 }) {
+  const [reservationMonth, setReservationMonth] = useState('all');
   const allRequests = [...appointments, ...reservations];
   const activeAppointments = allRequests.filter((item) => item.status !== 'cancelled');
   const dayAppointments = appointments
@@ -43,6 +44,41 @@ export function ProfessionalManagement({
   const showReservations = hasReservations || reservationsStatus.type === 'error';
   const showAgenda = hasAppointments || status.type === 'error';
   const hasAnyData = hasAppointments || hasReservations;
+
+  // Reservas por mês (gráfico + filtro). Agrupa pela data de início.
+  const reservationMonthKeys = Array.from(
+    new Set(activeReservations.map((item) => String(item.start_date).slice(0, 7))),
+  ).filter(Boolean).sort();
+  const reservationMonthData = reservationMonthKeys.map((key) => ({
+    key,
+    value: activeReservations.filter((item) => String(item.start_date).slice(0, 7) === key).length,
+  }));
+  const visibleReservations = reservationMonth === 'all'
+    ? reservations
+    : reservations.filter((item) => String(item.start_date).slice(0, 7) === reservationMonth);
+
+  const reservationMonthOption = {
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: 12, right: 12, top: 24, bottom: 20, containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: reservationMonthData.map((item) => item.key),
+      axisLabel: { color: '#64748b', fontWeight: 700, formatter: (key) => formatMonthLabel(key) },
+    },
+    yAxis: {
+      type: 'value',
+      minInterval: 1,
+      axisLabel: { color: '#64748b', fontWeight: 700 },
+      splitLine: { lineStyle: { color: '#eaf1f8' } },
+    },
+    series: [{
+      name: 'Reservas',
+      type: 'bar',
+      data: reservationMonthData.map((item) => item.value),
+      label: { show: true, position: 'top', color: '#0b1f44', fontWeight: 900, formatter: '{c}' },
+      itemStyle: { borderRadius: [10, 10, 0, 0], color: '#1c8dff' },
+    }],
+  };
 
   const reasonOption = {
     tooltip: { trigger: 'item' },
@@ -125,10 +161,40 @@ export function ProfessionalManagement({
                 Estadias, locações e eventos com uma ou mais datas selecionadas.
               </p>
             </div>
-            <p className="rounded-full bg-brand-50 px-4 py-2 text-sm font-extrabold text-brand-700">
-              {activeReservations.length} ativa(s)
-            </p>
+            <div className="flex items-center gap-3">
+              {reservationMonthKeys.length > 0 && (
+                <select
+                  value={reservationMonth}
+                  onChange={(event) => setReservationMonth(event.target.value)}
+                  className="h-10 rounded-2xl border border-slate-200 bg-white px-3 text-sm font-bold outline-none"
+                >
+                  <option value="all">Todos os meses</option>
+                  {reservationMonthKeys.map((key) => (
+                    <option key={key} value={key}>{formatMonthLabel(key)}</option>
+                  ))}
+                </select>
+              )}
+              <p className="rounded-full bg-brand-50 px-4 py-2 text-sm font-extrabold text-brand-700">
+                {activeReservations.length} ativa(s)
+              </p>
+            </div>
           </div>
+
+          {reservationMonthData.length > 0 && (
+            <div className="mt-5 rounded-3xl bg-white p-4">
+              <div className="mb-2 flex flex-wrap items-center gap-2">
+                <BarChart3 size={18} className="text-brand-600" />
+                <h3 className="text-base font-extrabold">Reservas por mês</h3>
+                <span className="text-xs font-semibold text-slate-400">(clique numa barra para filtrar)</span>
+              </div>
+              <EChart
+                option={reservationMonthOption}
+                empty={false}
+                height="h-56"
+                onClick={(params) => setReservationMonth((current) => (current === params.name ? 'all' : params.name))}
+              />
+            </div>
+          )}
 
           {reservationsStatus.message && (
             <p className={`mt-4 rounded-2xl p-4 text-sm font-bold ${
@@ -139,8 +205,8 @@ export function ProfessionalManagement({
           )}
 
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            {reservations.length
-              ? reservations.map((reservation) => (
+            {visibleReservations.length
+              ? visibleReservations.map((reservation) => (
                 <article key={reservation.id} className="rounded-3xl bg-white p-4 shadow-sm">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
@@ -174,7 +240,7 @@ export function ProfessionalManagement({
                   </div>
                 </article>
               ))
-              : <div className="lg:col-span-2"><EmptyState text="Nenhuma reserva por período recebida." /></div>}
+              : <div className="lg:col-span-2"><EmptyState text={reservations.length ? 'Nenhuma reserva neste mês.' : 'Nenhuma reserva por período recebida.'} /></div>}
           </div>
         </div>
       )}
@@ -324,7 +390,7 @@ function WhatsAppButton({ href, label = 'WhatsApp' }) {
   );
 }
 
-function EChart({ option, empty }) {
+function EChart({ option, empty, onClick, height = 'h-72' }) {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -332,6 +398,7 @@ function EChart({ option, empty }) {
 
     const chart = echarts.init(chartRef.current);
     chart.setOption(option);
+    if (onClick) chart.on('click', onClick);
 
     function handleResize() { chart.resize(); }
     window.addEventListener('resize', handleResize);
@@ -340,17 +407,17 @@ function EChart({ option, empty }) {
       window.removeEventListener('resize', handleResize);
       chart.dispose();
     };
-  }, [empty, option]);
+  }, [empty, option, onClick]);
 
   if (empty) {
     return (
-      <div className="grid h-72 place-items-center rounded-3xl bg-white text-sm font-bold text-slate-500">
+      <div className={`grid ${height} place-items-center rounded-3xl bg-white text-sm font-bold text-slate-500`}>
         Sem dados suficientes.
       </div>
     );
   }
 
-  return <div ref={chartRef} className="h-72 w-full" />;
+  return <div ref={chartRef} className={`${height} w-full`} />;
 }
 
 function ManagementMetric({ label, value, Icon, tone = 'blue' }) {
@@ -459,4 +526,13 @@ function percentage(part, total) {
 function formatDate(value) {
   if (!value) return '';
   return new Intl.DateTimeFormat('pt-BR').format(new Date(`${value}T12:00:00`));
+}
+
+// 'YYYY-MM' -> 'mês/AA' (ex.: '2026-12' -> 'dez/26')
+function formatMonthLabel(key) {
+  if (!key) return '';
+  const [year, month] = key.split('-');
+  const date = new Date(Number(year), Number(month) - 1, 1);
+  const label = new Intl.DateTimeFormat('pt-BR', { month: 'short' }).format(date).replace('.', '');
+  return `${label}/${String(year).slice(2)}`;
 }
