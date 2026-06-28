@@ -83,16 +83,13 @@ export function ServicesModule({
                 onImageUpload={(file) => onServiceImageUpload?.(index, file)}
               />
               <div className="p-8">
-                <div className="mb-5 flex items-center justify-between gap-4">
-                  <p className="text-xs font-extrabold uppercase text-[var(--preview-primary)]">
-                    {copy.cardPrefix} {String(index + 1).padStart(2, '0')}
-                  </p>
-                  {!rangeReservation && (
+                {!rangeReservation && (
+                  <div className="mb-5 flex items-center justify-end">
                     <span className="rounded-full border border-[var(--preview-border)] bg-[var(--preview-surface)] px-3 py-1 text-xs font-extrabold text-[var(--preview-muted)]">
                       {service.duration || service.duration_minutes || 30} {copy.durationSuffix}
                     </span>
-                  )}
-                </div>
+                  </div>
+                )}
                 <h3
                   className={`rounded-xl text-3xl font-black outline-none ${
                     editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-2 focus:py-1 focus:ring-[var(--preview-primary)]/25' : ''
@@ -103,8 +100,15 @@ export function ServicesModule({
                 >
                   {service.name}
                 </h3>
-                <p className={`mt-3 text-sm font-extrabold uppercase ${editorial ? 'text-violet-700' : 'text-[var(--preview-primary)]/80'}`}>
-                  {getServiceEmotionalLine(config.vertical, index)}
+                <p
+                  className={`mt-3 text-sm font-extrabold uppercase outline-none ${editorial ? 'text-violet-700' : 'text-[var(--preview-primary)]/80'} ${
+                    editMode ? 'cursor-text rounded-xl ring-2 ring-transparent transition focus:bg-[var(--preview-surface)] focus:px-2 focus:py-1 focus:ring-[var(--preview-primary)]/25' : ''
+                  }`}
+                  contentEditable={editMode}
+                  suppressContentEditableWarning
+                  onBlur={(event) => onServiceTextChange?.(index, 'subtitle', event.currentTarget.textContent)}
+                >
+                  {service.subtitle || getServiceEmotionalLine(config.vertical, index)}
                 </p>
                 <p
                   className={`mt-5 rounded-xl leading-8 outline-none ${editorial ? 'text-slate-600' : 'text-[var(--preview-muted)]'} ${

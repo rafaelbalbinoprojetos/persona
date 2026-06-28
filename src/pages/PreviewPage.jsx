@@ -279,6 +279,19 @@ function PreviewLanding({ submission, isLive = true }) {
     }
   }
 
+  async function uploadLogo(file) {
+    const previousImageUrl = localSubmission.payload?.business_branding?.logo_url || '';
+    const publicUrl = await uploadLandingImage(file, 'logo');
+    if (!publicUrl) return;
+
+    const nextSubmission = withBrandingField(localSubmission, 'logo_url', publicUrl);
+    setLocalSubmission(nextSubmission);
+    const saved = await saveSubmission(nextSubmission, 'Logo atualizada.');
+    if (saved) {
+      await removePreviousLandingAsset(previousImageUrl, publicUrl, session.user.id);
+    }
+  }
+
   async function uploadServiceImage(index, file) {
     const previousImageUrl = getServiceImageUrl(localSubmission, index, config.services);
     const publicUrl = await uploadLandingImage(file, `service-${index + 1}`);
@@ -420,6 +433,7 @@ function PreviewLanding({ submission, isLive = true }) {
         theme={config.theme}
         onOpenSettings={() => setSettingsOpen(true)}
         onSignOut={signOut}
+        onLogoUpload={uploadLogo}
         canEdit={canEdit}
       />
       <ThemeSettingsPanel

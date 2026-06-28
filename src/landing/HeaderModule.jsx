@@ -1,8 +1,8 @@
-import { CalendarCheck, ClipboardCheck, LogOut, Settings, Sparkles } from 'lucide-react';
+import { CalendarCheck, ClipboardCheck, ImagePlus, LogOut, Settings, Sparkles } from 'lucide-react';
 import { buttonClass } from './theme.js';
 
-export function HeaderModule({ config, theme, onOpenSettings, onSignOut, canEdit = false }) {
-  const { business, preset, conversion } = config;
+export function HeaderModule({ config, theme, onOpenSettings, onSignOut, onLogoUpload, canEdit = false }) {
+  const { business, branding, preset, conversion } = config;
   const Icon = preset.Icon || Sparkles;
   const conversionLabel = conversion?.mode === 'appointment' ? preset.sectionLabels.schedule : getConversionLabel(conversion?.mode);
   const ctaLabel = conversion?.buttonLabel || conversionLabel;
@@ -10,15 +10,46 @@ export function HeaderModule({ config, theme, onOpenSettings, onSignOut, canEdit
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-[var(--preview-border)] bg-[var(--preview-surface)]/90 backdrop-blur-xl">
       <nav className="section-shell flex h-20 items-center justify-between gap-3">
-        <a href="#top" className="flex min-w-0 items-center gap-3">
-          <span
-            className="grid h-11 w-11 shrink-0 place-items-center text-white shadow-[var(--preview-glow)]"
-            style={{ backgroundColor: theme.primary, borderRadius: theme.radius }}
-          >
-            <Icon size={23} />
-          </span>
-          <span className="truncate text-lg font-extrabold sm:text-xl">{business.name}</span>
-        </a>
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="relative shrink-0">
+            <a href="#top" aria-label={business.name}>
+              {branding.logo_url ? (
+                <img
+                  src={branding.logo_url}
+                  alt={business.name}
+                  className="h-11 w-11 object-cover shadow-[var(--preview-glow)]"
+                  style={{ borderRadius: theme.radius }}
+                />
+              ) : (
+                <span
+                  className="grid h-11 w-11 place-items-center text-white shadow-[var(--preview-glow)]"
+                  style={{ backgroundColor: theme.primary, borderRadius: theme.radius }}
+                >
+                  <Icon size={23} />
+                </span>
+              )}
+            </a>
+            {canEdit && (
+              <label
+                className="absolute -bottom-1.5 -right-1.5 grid h-6 w-6 cursor-pointer place-items-center rounded-full border border-white/25 bg-black/60 text-white transition hover:bg-black/80"
+                aria-label="Trocar logo"
+              >
+                <ImagePlus size={12} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) onLogoUpload?.(file);
+                    event.target.value = '';
+                  }}
+                />
+              </label>
+            )}
+          </div>
+          <a href="#top" className="truncate text-lg font-extrabold sm:text-xl">{business.name}</a>
+        </div>
 
         <div className="hidden items-center gap-8 lg:flex">
           <a href="#servicos" className="text-sm font-semibold text-[var(--preview-muted)] hover:text-[var(--preview-primary)]">
