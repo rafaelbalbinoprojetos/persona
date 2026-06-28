@@ -54,6 +54,12 @@ export function ProfessionalManagement({
     ? Math.round((dayBooked / daySchedule.slots.length) * 100)
     : 0;
 
+  // Todos os agendamentos pendentes (qualquer data), em ordem cronológica,
+  // para o dono confirmar/recusar sem precisar procurar o dia.
+  const pendingAppointments = appointments
+    .filter((item) => item.status === 'pending')
+    .sort((a, b) => `${a.appointment_date} ${a.start_time}`.localeCompare(`${b.appointment_date} ${b.start_time}`));
+
   // Reservas por mês (gráfico + filtro). Agrupa pela data de início.
   const reservationMonthKeys = Array.from(
     new Set(activeReservations.map((item) => String(item.start_date).slice(0, 7))),
@@ -254,9 +260,55 @@ export function ProfessionalManagement({
         </div>
       )}
 
+      {showAgenda && pendingAppointments.length > 0 && (
+        <div className="rounded-[2rem] border border-amber-200 bg-amber-50/60 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-extrabold">Agendamentos pendentes</h2>
+              <p className="mt-1 text-sm font-semibold text-slate-500">
+                Confirme ou recuse sem precisar procurar o dia.
+              </p>
+            </div>
+            <span className="rounded-full bg-amber-500 px-4 py-2 text-sm font-extrabold text-white">
+              {pendingAppointments.length} pendente(s)
+            </span>
+          </div>
+          <div className="mt-6 grid gap-4 lg:grid-cols-2">
+            {pendingAppointments.map((appt) => (
+              <article key={appt.id} className="rounded-2xl border border-amber-200 bg-white p-4">
+                <p className="text-xs font-extrabold uppercase text-amber-600">
+                  {formatDate(appt.appointment_date)} · {normalizeTime(appt.start_time)}
+                </p>
+                <h3 className="mt-1 text-lg font-extrabold">{appt.customer_name}</h3>
+                <p className="mt-1 text-sm font-semibold text-slate-600">{getAppointmentReason(appt)}</p>
+                <p className="mt-1 text-xs font-bold text-slate-400">{formatPhone(appt.customer_whatsapp)}</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <WhatsAppButton href={whatsappHref(appt.customer_whatsapp, appointmentMessage(appt))} />
+                  <button onClick={() => onUpdateStatus(appt.id, 'confirmed')} className="pill-button bg-emerald-50 px-4 py-2 text-emerald-600">
+                    <CheckCircle2 size={17} /> Confirmar
+                  </button>
+                  <button onClick={() => onUpdateStatus(appt.id, 'cancelled')} className="pill-button bg-red-50 px-4 py-2 text-red-500">
+                    <XCircle size={17} /> Cancelar
+                  </button>
+                  <button
+                    onClick={() => {
+                      onDateChange(appt.appointment_date);
+                      window.setTimeout(() => document.getElementById('agenda-do-dia')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+                    }}
+                    className="pill-button bg-brand-50 px-4 py-2 text-brand-700"
+                  >
+                    <CalendarCheck size={17} /> Ver no dia
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+
       {showAgenda && (
         <div className="grid gap-6 2xl:grid-cols-[minmax(720px,1.35fr)_minmax(520px,0.85fr)]">
-          <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
+          <div id="agenda-do-dia" className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-2xl font-extrabold">Agenda do dia</h2>
