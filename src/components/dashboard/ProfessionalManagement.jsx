@@ -147,13 +147,13 @@ export function ProfessionalManagement({
       </div>
 
       {!hasAnyData && reservationsStatus.type !== 'error' && status.type !== 'error' && (
-        <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+        <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
           <EmptyState text="Nenhuma solicitação recebida ainda. Compartilhe sua página para começar a receber agendamentos e reservas." />
         </div>
       )}
 
       {showReservations && (
-        <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+        <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-2xl font-extrabold">Reservas por período</h2>
@@ -181,7 +181,7 @@ export function ProfessionalManagement({
           </div>
 
           {reservationMonthData.length > 0 && (
-            <div className="mt-5 rounded-3xl bg-white p-4">
+            <div className="mt-5 rounded-3xl border border-slate-200 bg-slate-50 p-4">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <BarChart3 size={18} className="text-brand-600" />
                 <h3 className="text-base font-extrabold">Reservas por mês</h3>
@@ -207,7 +207,7 @@ export function ProfessionalManagement({
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
             {visibleReservations.length
               ? visibleReservations.map((reservation) => (
-                <article key={reservation.id} className="rounded-3xl bg-white p-4 shadow-sm">
+                <article key={reservation.id} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-extrabold uppercase text-brand-600">Período reservado</p>
@@ -247,7 +247,7 @@ export function ProfessionalManagement({
 
       {showAgenda && (
         <div className="grid gap-6 2xl:grid-cols-[minmax(720px,1.35fr)_minmax(520px,0.85fr)]">
-          <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+          <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-2xl font-extrabold">Agenda do dia</h2>
@@ -284,7 +284,7 @@ export function ProfessionalManagement({
                 ? dayAppointments.map((appointment) => (
                   <article
                     key={appointment.id}
-                    className="grid gap-4 rounded-3xl bg-white p-4 shadow-sm sm:grid-cols-[90px_1fr_auto] sm:items-center"
+                    className="grid gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[90px_1fr_auto] sm:items-center"
                   >
                     <div className="rounded-2xl bg-brand-50 px-4 py-3 text-center">
                       <p className="text-xl font-extrabold text-brand-700">{normalizeTime(appointment.start_time)}</p>
@@ -345,14 +345,14 @@ export function ProfessionalManagement({
           </div>
 
           <div className="grid gap-6 xl:grid-cols-2 2xl:grid-cols-1">
-            <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+            <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
               <div className="mb-4 flex items-center gap-2">
                 <PieChart size={20} className="text-brand-600" />
                 <h2 className="text-xl font-extrabold">Motivos dos agendamentos</h2>
               </div>
               <EChart option={reasonOption} empty={!reasonData.length} />
             </div>
-            <div className="rounded-[2rem] bg-[#fbfdff] p-5">
+            <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-5">
               <div className="mb-4 flex items-center gap-2">
                 <BarChart3 size={20} className="text-brand-600" />
                 <h2 className="text-xl font-extrabold">Status da agenda</h2>
@@ -411,7 +411,7 @@ function EChart({ option, empty, onClick, height = 'h-72' }) {
 
   if (empty) {
     return (
-      <div className={`grid ${height} place-items-center rounded-3xl bg-white text-sm font-bold text-slate-500`}>
+      <div className={`grid ${height} place-items-center rounded-3xl bg-slate-50 text-sm font-bold text-slate-500`}>
         Sem dados suficientes.
       </div>
     );
@@ -429,7 +429,7 @@ function ManagementMetric({ label, value, Icon, tone = 'blue' }) {
   };
 
   return (
-    <div className="rounded-[2rem] bg-[#fbfdff] p-6">
+    <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-6">
       <span className={`grid h-12 w-12 place-items-center rounded-2xl ${tones[tone]}`}>
         <Icon size={21} />
       </span>
@@ -441,7 +441,7 @@ function ManagementMetric({ label, value, Icon, tone = 'blue' }) {
 
 function InsightCard({ title, value, description }) {
   return (
-    <div className="rounded-[2rem] bg-[#fbfdff] p-6">
+    <div className="rounded-[2rem] border border-slate-200 bg-white shadow-sm p-6">
       <p className="text-sm font-extrabold uppercase text-brand-600">{title}</p>
       <p className="mt-3 text-3xl font-extrabold">{value}</p>
       <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">{description}</p>
