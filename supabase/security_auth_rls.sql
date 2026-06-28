@@ -98,7 +98,7 @@ drop policy if exists "Authenticated owners can update own appointment requests"
 
 create policy "Anon can create appointment requests"
 on public.appointment_requests for insert
-to anon
+to anon, authenticated
 with check (
   status = 'pending'
   and source = 'preview_landing'
@@ -155,7 +155,7 @@ from public.appointment_requests
 where status in ('pending', 'confirmed');
 
 revoke all on public.appointment_requests from anon, authenticated;
-grant insert on public.appointment_requests to anon;
+grant insert on public.appointment_requests to anon, authenticated;
 grant select, update on public.appointment_requests to authenticated;
 grant select on public.public_appointment_slots to anon, authenticated;
 

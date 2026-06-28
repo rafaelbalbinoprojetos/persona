@@ -1,4 +1,4 @@
-import { ClipboardCheck, LogOut, Settings, Sparkles } from 'lucide-react';
+import { CalendarCheck, ClipboardCheck, LogOut, Settings, Sparkles } from 'lucide-react';
 import { buttonClass } from './theme.js';
 
 export function HeaderModule({ config, theme, onOpenSettings, onSignOut, canEdit = false }) {
@@ -44,6 +44,14 @@ export function HeaderModule({ config, theme, onOpenSettings, onSignOut, canEdit
           </a>
           {canEdit && (
             <>
+              <a
+                href={`/agenda?slug=${encodeURIComponent(config.submission?.slug || '')}`}
+                className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-[var(--preview-border)] bg-[var(--preview-card)] px-3 text-sm font-bold text-[var(--preview-text)] transition hover:-translate-y-0.5 sm:px-4"
+                aria-label="Agenda e reservas"
+              >
+                <CalendarCheck size={18} />
+                <span className="hidden sm:inline">Agenda</span>
+              </a>
               <button
                 type="button"
                 onClick={onOpenSettings}

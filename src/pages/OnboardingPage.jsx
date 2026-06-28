@@ -269,7 +269,7 @@ export default function OnboardingPage() {
         email: form.email,
         hero_image_url: form.heroImageUrl,
         payload,
-        status: 'new',
+        status: 'preview',
       });
 
     if (error) {
