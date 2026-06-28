@@ -68,7 +68,7 @@ export function FooterModule({ config, theme, editMode = false, onEditContact, o
             © {new Date().getFullYear()} {professional.name || business.name}. Todos os direitos
             reservados.
           </p>
-          <p>Design, presença e experiência em uma única plataforma.</p>
+          <p>Atendimento de qualidade e agendamento online.</p>
         </div>
       </div>
     </footer>

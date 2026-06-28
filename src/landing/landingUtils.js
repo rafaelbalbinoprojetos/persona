@@ -41,11 +41,11 @@ export function isVenueVertical(vertical) {
 export function getHeroMicrocopy(config) {
   const isVenue = isVenueVertical(config.vertical);
   return {
-    eyebrow: isVenue ? 'Espaço para reserva' : 'Marca profissional premium',
+    eyebrow: isVenue ? 'Espaço para reserva' : (config.preset?.label || 'Atendimento profissional'),
     primaryCta: isVenue ? 'Reservar agora' : 'Agendar agora',
-    secondaryCta: isVenue ? 'Conhecer o espaço' : 'Conhecer assinatura profissional',
+    secondaryCta: isVenue ? 'Conhecer o espaço' : 'Conhecer os serviços',
     trustTitle: isVenue ? 'Reserva facilitada' : 'Presença verificada',
-    countLabel: isVenue ? 'opções de reserva' : 'experiências disponíveis',
+    countLabel: isVenue ? 'opções de reserva' : `${(config.preset?.sectionLabels?.services || 'serviços').toLowerCase()} disponíveis`,
     socialTitle: isVenue ? 'Canal oficial ativo' : 'Presença digital ativa',
     availabilitySubtitle: isVenue ? 'Próxima data disponível' : 'Próxima disponibilidade',
   };
@@ -63,11 +63,11 @@ export function getServicesIntroCopy(config) {
   }
 
   return {
-    title: 'Experiências desenhadas com intenção',
-    description: 'Serviços apresentados com clareza, desejo e alinhamento a uma presença premium.',
-    cardPrefix: 'Experiência',
+    title: 'Conheça nossos serviços',
+    description: 'Escolha o que você precisa e agende em poucos cliques.',
+    cardPrefix: 'Serviço',
     durationSuffix: 'min',
-    emptyDescription: `Uma experiência personalizada e cuidadosamente conduzida para ${config.preset.label.toLowerCase()}.`,
+    emptyDescription: 'Saiba mais e agende este serviço.',
   };
 }
 
@@ -80,7 +80,7 @@ export function getSignatureIntroCopy(config) {
   }
 
   return {
-    eyebrow: 'Assinatura profissional',
+    eyebrow: 'Nosso atendimento',
     title: 'Uma forma própria de atender, orientar e transformar.',
   };
 }
@@ -96,10 +96,10 @@ export function getFooterCopy(config) {
   }
 
   return {
-    description: `${config.preset.label} com presença digital premium, experiência autoral e agenda inteligente.`,
-    contactFallback: 'Presença digital premium para profissionais.',
-    servicesTitle: 'Experiências',
-    exploreServicesLabel: 'Experiências',
+    description: `${config.preset.label} com atendimento de qualidade e agendamento online.`,
+    contactFallback: 'Atendimento, localização e contato em um só lugar.',
+    servicesTitle: config.preset.sectionLabels.services,
+    exploreServicesLabel: config.preset.sectionLabels.services,
   };
 }
 

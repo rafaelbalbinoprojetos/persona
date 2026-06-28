@@ -646,7 +646,7 @@ function withNewService(submission, fallbackServices = []) {
         ...services,
         {
           name: 'Novo serviço',
-          description: 'Descreva este serviço diretamente aqui.',
+          description: '',
           duration: 30,
           price: '',
           image_url: '',
