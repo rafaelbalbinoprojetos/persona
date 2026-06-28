@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ImagePlus, Mail, MapPin, Phone, Plus, Sparkles } from 'lucide-react';
+import { ImagePlus, Mail, MapPin, Pencil, Phone, Plus, Sparkles } from 'lucide-react';
 
 export function hasValue(value) {
   return typeof value === 'number' || Boolean(String(value || '').trim());
@@ -60,11 +60,37 @@ export function SmartContactList({ whatsapp, email, address, isOwner = false, on
 
   return (
     <div className="space-y-3 text-[var(--preview-muted)]">
-      {items.map(({ key, label, value, Icon }) => (
-        <EditableSlot key={key} hasContent={hasValue(value)} isOwner={isOwner} emptyLabel={`Adicionar ${label}`} icon={<Plus size={16} />} onClick={() => onEditField?.(key)}>
-          <div className="flex items-center gap-3 font-bold"><Icon size={19} className="text-[var(--preview-primary)]" /><span>{value}</span></div>
-        </EditableSlot>
-      ))}
+      {items.map(({ key, label, value, Icon }) => {
+        if (hasValue(value)) {
+          return (
+            <div key={key} className="flex items-center gap-3 font-bold">
+              <Icon size={19} className="text-[var(--preview-primary)]" />
+              <span>{value}</span>
+              {isOwner && (
+                <button
+                  type="button"
+                  onClick={() => onEditField?.(key)}
+                  aria-label={`Editar ${label}`}
+                  className="text-[var(--preview-muted)] transition hover:text-[var(--preview-primary)]"
+                >
+                  <Pencil size={15} />
+                </button>
+              )}
+            </div>
+          );
+        }
+        if (!isOwner) return null;
+        return (
+          <EditableSlot
+            key={key}
+            hasContent={false}
+            isOwner
+            emptyLabel={`Adicionar ${label}`}
+            icon={<Plus size={16} />}
+            onClick={() => onEditField?.(key)}
+          />
+        );
+      })}
     </div>
   );
 }

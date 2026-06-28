@@ -1,4 +1,4 @@
-import { Image } from 'lucide-react';
+import { Image, MapPin } from 'lucide-react';
 import { Input, Textarea } from './DashboardShared.jsx';
 import { defaultEnabledModules } from '../../landing/presets.js';
 import { themeTokens } from '../../landing/theme.js';
@@ -21,11 +21,13 @@ export function AppearanceEditor({
   draft,
   updateBusiness,
   updateBranding,
+  updateLocation,
   updatePrimaryProfessional,
   updateEnabledModule,
 }) {
   const business = draft.payload.businesses || {};
   const branding = draft.payload.business_branding || {};
+  const location = draft.payload.business_locations || {};
   const primaryProfessional = draft.payload.professionals?.[0] || {};
   const enabledModules = {
     ...defaultEnabledModules,
@@ -59,6 +61,13 @@ export function AppearanceEditor({
           label="E-mail"
           value={business.email || ''}
           onChange={(value) => updateBusiness('email', value)}
+        />
+        <Input
+          label="Endereço (exibe o mapa)"
+          value={location.address || ''}
+          onChange={(value) => updateLocation('address', value)}
+          placeholder="Rua, número, bairro, cidade"
+          icon={<MapPin size={18} />}
         />
         <label className="rounded-3xl border border-[var(--preview-border)] bg-[var(--preview-card)] p-4">
           <span className="mb-3 block text-xs font-bold uppercase text-[var(--preview-muted)]">Cor principal</span>

@@ -242,6 +242,20 @@ export default function DashboardPage() {
     }));
   }
 
+  function updateLocation(field, value) {
+    setDraft((current) => ({
+      ...current,
+      payload: {
+        ...current.payload,
+        business_locations: {
+          ...(current.payload.business_locations || {}),
+          [field]: value,
+          is_main: true,
+        },
+      },
+    }));
+  }
+
   function updateBranding(field, value) {
     if (field === 'theme_key' && draft?.slug) {
       if (value) localStorage.setItem(`preview-theme:${draft.slug}`, value);
@@ -759,6 +773,7 @@ export default function DashboardPage() {
                   draft={draft}
                   updateBusiness={updateBusiness}
                   updateBranding={updateBranding}
+                  updateLocation={updateLocation}
                   updatePrimaryProfessional={updatePrimaryProfessional}
                   updateEnabledModule={updateEnabledModule}
                 />
