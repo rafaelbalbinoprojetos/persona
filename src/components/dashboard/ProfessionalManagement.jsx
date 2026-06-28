@@ -8,6 +8,7 @@ import {
   Clock3,
   MessageCircle,
   PieChart,
+  Plus,
   UserRound,
   XCircle,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ export function ProfessionalManagement({
   onRefresh,
   onUpdateStatus,
   onUpdateReservationStatus,
+  availability = [],
 }) {
   const [reservationMonth, setReservationMonth] = useState('all');
   const allRequests = [...appointments, ...reservations];
@@ -44,6 +46,13 @@ export function ProfessionalManagement({
   const showReservations = hasReservations || reservationsStatus.type === 'error';
   const showAgenda = hasAppointments || status.type === 'error';
   const hasAnyData = hasAppointments || hasReservations;
+
+  // Timeline do dia (agendamento por hora): grade de horários com vagos.
+  const daySchedule = buildDaySlots(selectedDate, appointments, availability);
+  const dayBooked = daySchedule.slots.filter((slot) => slot.appointment).length;
+  const dayOccupancy = daySchedule.slots.length
+    ? Math.round((dayBooked / daySchedule.slots.length) * 100)
+    : 0;
 
   // Reservas por mês (gráfico + filtro). Agrupa pela data de início.
   const reservationMonthKeys = Array.from(
@@ -255,7 +264,10 @@ export function ProfessionalManagement({
                   Timeline dos clientes, horários e motivos do agendamento.
                 </p>
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <span className="self-start rounded-full bg-brand-50 px-4 py-2 text-sm font-extrabold text-brand-700 sm:self-center">
+                  Ocupação {dayOccupancy}%
+                </span>
                 <input
                   type="date"
                   value={selectedDate}
@@ -279,68 +291,71 @@ export function ProfessionalManagement({
               </p>
             )}
 
-            <div className="mt-6 space-y-4">
-              {dayAppointments.length
-                ? dayAppointments.map((appointment) => (
-                  <article
-                    key={appointment.id}
-                    className="grid gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[90px_1fr_auto] sm:items-center"
-                  >
-                    <div className="rounded-2xl bg-brand-50 px-4 py-3 text-center">
-                      <p className="text-xl font-extrabold text-brand-700">{normalizeTime(appointment.start_time)}</p>
-                      <p className="text-xs font-bold uppercase text-slate-500">{appointmentStatusLabel(appointment.status)}</p>
-                    </div>
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-extrabold">{appointment.customer_name}</h3>
-                        <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${statusClass(appointment.status)}`}>
-                          {appointmentStatusLabel(appointment.status)}
-                        </span>
+            <div className="mt-6 space-y-2">
+              {daySchedule.slots.length
+                ? daySchedule.slots.map((slot) => (
+                  <div key={slot.time} className="flex items-stretch gap-3">
+                    <div className="w-14 flex-none pt-3 text-sm font-extrabold text-slate-400">{slot.time}</div>
+                    {slot.appointment ? (
+                      <div className="flex flex-1 flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-base font-extrabold">{slot.appointment.customer_name}</h3>
+                            <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${statusClass(slot.appointment.status)}`}>
+                              {appointmentStatusLabel(slot.appointment.status)}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-sm font-semibold text-slate-600">
+                            {slot.time}–{slotEnd(slot.time, slot.appointment, daySchedule.interval)} · {getAppointmentReason(slot.appointment)}
+                            {appointmentProfessional(slot.appointment) ? ` · ${appointmentProfessional(slot.appointment)}` : ''}
+                          </p>
+                          <p className="mt-1 text-xs font-bold text-slate-400">{formatPhone(slot.appointment.customer_whatsapp)}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <a
+                            href={whatsappHref(slot.appointment.customer_whatsapp, appointmentMessage(slot.appointment))}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="grid h-10 w-10 place-items-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
+                            aria-label="Falar no WhatsApp"
+                          >
+                            <MessageCircle size={18} />
+                          </a>
+                          <button
+                            onClick={() => onUpdateStatus(slot.appointment.id, 'confirmed')}
+                            disabled={slot.appointment.status === 'confirmed' || slot.appointment.status === 'completed'}
+                            className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-emerald-600 disabled:opacity-35"
+                            aria-label="Confirmar"
+                          >
+                            <CheckCircle2 size={18} />
+                          </button>
+                          {slot.appointment.status === 'confirmed' && (
+                            <button
+                              onClick={() => onUpdateStatus(slot.appointment.id, 'completed')}
+                              className="grid h-10 w-10 place-items-center rounded-full bg-brand-50 text-brand-700"
+                              aria-label="Concluir"
+                            >
+                              <CheckCheck size={18} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => onUpdateStatus(slot.appointment.id, 'cancelled')}
+                            disabled={slot.appointment.status === 'cancelled'}
+                            className="grid h-10 w-10 place-items-center rounded-full bg-red-50 text-red-500 disabled:opacity-35"
+                            aria-label="Cancelar"
+                          >
+                            <XCircle size={18} />
+                          </button>
+                        </div>
                       </div>
-                      <p className="mt-2 text-sm font-bold text-slate-500">WhatsApp: {formatPhone(appointment.customer_whatsapp)}</p>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                        Motivo: <span className="font-extrabold text-brand-900">{getAppointmentReason(appointment)}</span>
-                      </p>
-                    </div>
-                    <div className="flex gap-2 sm:flex-col">
-                      <a
-                        href={whatsappHref(appointment.customer_whatsapp, appointmentMessage(appointment))}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="grid h-10 w-10 place-items-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
-                        aria-label="Falar no WhatsApp"
-                      >
-                        <MessageCircle size={18} />
-                      </a>
-                      <button
-                        onClick={() => onUpdateStatus(appointment.id, 'confirmed')}
-                        disabled={appointment.status === 'confirmed' || appointment.status === 'completed'}
-                        className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-emerald-600 disabled:opacity-35"
-                        aria-label="Confirmar"
-                      >
-                        <CheckCircle2 size={18} />
-                      </button>
-                      {appointment.status === 'confirmed' && (
-                        <button
-                          onClick={() => onUpdateStatus(appointment.id, 'completed')}
-                          className="grid h-10 w-10 place-items-center rounded-full bg-brand-50 text-brand-700"
-                          aria-label="Concluir"
-                        >
-                          <CheckCheck size={18} />
-                        </button>
-                      )}
-                      <button
-                        onClick={() => onUpdateStatus(appointment.id, 'cancelled')}
-                        disabled={appointment.status === 'cancelled'}
-                        className="grid h-10 w-10 place-items-center rounded-full bg-red-50 text-red-500 disabled:opacity-35"
-                        aria-label="Cancelar"
-                      >
-                        <XCircle size={18} />
-                      </button>
-                    </div>
-                  </article>
+                    ) : (
+                      <div className="flex flex-1 items-center gap-2 rounded-2xl border border-dashed border-slate-300 p-3 text-sm font-semibold text-slate-400">
+                        <Plus size={16} /> Horário livre · disponível
+                      </div>
+                    )}
+                  </div>
                 ))
-                : <EmptyState text="Nenhum agendamento para esta data." />}
+                : <EmptyState text="Sem horários configurados para este dia." />}
             </div>
           </div>
 
@@ -526,6 +541,71 @@ function percentage(part, total) {
 function formatDate(value) {
   if (!value) return '';
   return new Intl.DateTimeFormat('pt-BR').format(new Date(`${value}T12:00:00`));
+}
+
+function timeToMinutes(value) {
+  const [h, m] = String(value || '').split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+function minutesToTime(total) {
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function slotEnd(time, appointment, interval) {
+  const duration = Number(appointment?.payload?.duration_minutes) || interval || 30;
+  return minutesToTime(timeToMinutes(time) + duration);
+}
+
+function appointmentProfessional(appointment) {
+  const payload = appointment?.payload || {};
+  return payload.professional || payload.professional_name || payload.professionalName || '';
+}
+
+// Monta a grade de horários do dia: usa as regras de disponibilidade da
+// página (dia da semana correspondente) e encaixa os agendamentos. Slots
+// ocupados por um agendamento em andamento não aparecem como "livre".
+function buildDaySlots(date, appointments, availability) {
+  if (!date) return { interval: 30, slots: [] };
+  const weekday = new Date(`${date}T12:00:00`).getDay();
+  const rules = (availability || []).filter((rule) => Number(rule.weekday) === weekday);
+  const interval = Number(rules[0]?.interval_minutes) || 30;
+  const dayAppts = (appointments || []).filter(
+    (item) => item.appointment_date === date && item.status !== 'cancelled',
+  );
+
+  const booked = dayAppts.map((appt) => {
+    const start = timeToMinutes(normalizeTime(appt.start_time));
+    const duration = Number(appt.payload?.duration_minutes) || interval || 30;
+    return { start, end: start + duration, appt };
+  });
+  const startByMinute = new Map(booked.map((item) => [item.start, item.appt]));
+
+  const gridMinutes = new Set();
+  if (rules.length) {
+    rules.forEach((rule) => {
+      const startM = timeToMinutes(rule.start_time || '08:00');
+      const endM = timeToMinutes(rule.end_time || '18:00');
+      const step = Number(rule.interval_minutes) || 30;
+      for (let m = startM; m < endM; m += step) gridMinutes.add(m);
+    });
+  } else if (!booked.length) {
+    for (let m = timeToMinutes('08:00'); m < timeToMinutes('18:00'); m += 30) gridMinutes.add(m);
+  }
+  booked.forEach((item) => gridMinutes.add(item.start));
+
+  const slots = [];
+  Array.from(gridMinutes).sort((a, b) => a - b).forEach((minute) => {
+    if (startByMinute.has(minute)) {
+      slots.push({ time: minutesToTime(minute), appointment: startByMinute.get(minute) });
+    } else if (!booked.some((item) => minute > item.start && minute < item.end)) {
+      slots.push({ time: minutesToTime(minute), appointment: null });
+    }
+  });
+
+  return { interval, slots };
 }
 
 // 'YYYY-MM' -> 'mês/AA' (ex.: '2026-12' -> 'dez/26')

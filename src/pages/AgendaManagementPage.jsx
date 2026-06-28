@@ -150,6 +150,7 @@ export default function AgendaManagementPage() {
             onRefresh={refresh}
             onUpdateStatus={updateAppointmentStatus}
             onUpdateReservationStatus={updateReservationStatus}
+            availability={selectedPage?.payload?.availability_rules || []}
           />
         ) : (
           <div className="rounded-3xl bg-white p-8 text-center font-bold text-slate-500">Nenhuma página encontrada.</div>
