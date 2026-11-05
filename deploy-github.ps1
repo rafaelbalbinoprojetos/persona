@@ -1,77 +1,65 @@
+# Deploy local do Persona
+# ----------------------------------------------------------------------------
+# Uso:
+#   .\deploy-github.ps1 -Message "Minha alteracao"            # branch atual
+#   .\deploy-github.ps1 -Message "..." -Migrate               # + aplica migrations no Supabase
+#
+# Fluxo: build -> (migrations) -> commit dos arquivos rastreados/novos -> push.
+# O push na main dispara o deploy de producao na Vercel e o workflow
+# .github/workflows/ci-deploy.yml (que tambem aplica migrations pendentes).
+
 param(
   [string]$Message = "Update project",
-  [switch]$SkipBuild
+  [switch]$SkipBuild,
+  [switch]$Migrate
 )
 
 $ErrorActionPreference = "Stop"
+$env:Path = "C:\Program Files\nodejs;$env:Path"
 
-function Write-Step {
-  param([string]$Text)
+function Write-Step([string]$Text) {
   Write-Host ""
   Write-Host "==> $Text" -ForegroundColor Cyan
 }
 
-function Ensure-Command {
-  param([string]$Name)
-  if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
-    throw "Comando '$Name' nao encontrado no PATH."
-  }
-}
-
-Ensure-Command git
-Ensure-Command npm
-
 $repoRoot = git rev-parse --show-toplevel 2>$null
-if (-not $repoRoot) {
-  throw "Esta pasta nao e um repositorio Git. Rode git init antes."
-}
-
+if (-not $repoRoot) { throw "Esta pasta nao e um repositorio Git." }
 Set-Location $repoRoot
-
 $branch = git branch --show-current
-if (-not $branch) {
-  throw "Nao foi possivel identificar a branch atual."
-}
 
-$remote = git remote get-url origin 2>$null
-if (-not $remote) {
-  throw "Remote 'origin' nao configurado."
-}
-
-Write-Step "Repositorio"
-Write-Host "Pasta:  $repoRoot"
-Write-Host "Branch: $branch"
-Write-Host "Origin: $remote"
+Write-Step "Repositorio: $repoRoot ($branch)"
 
 if (-not $SkipBuild) {
   Write-Step "Build de producao"
   npm run build
+  if ($LASTEXITCODE -ne 0) { throw "Build falhou. Nada foi enviado." }
 }
 
-Write-Step "Verificando alteracoes"
-$status = git status --porcelain
-if (-not $status) {
-  Write-Host "Nenhuma alteracao para enviar." -ForegroundColor Yellow
-  Write-Step "Push"
-  git push origin $branch
-  Write-Host "Push concluido." -ForegroundColor Green
-  exit 0
+if ($Migrate) {
+  Write-Step "Migrations pendentes no Supabase"
+  npx supabase migration list --linked
+  npx supabase db push --linked
+  if ($LASTEXITCODE -ne 0) { throw "Falha ao aplicar migrations." }
 }
-
-git status --short
 
 Write-Step "Commit"
-git add .
-
+git add -A
+git reset -q -- .env .env.local .vercel 2>$null
 $staged = git diff --cached --name-only
-if (-not $staged) {
-  Write-Host "Nenhuma alteracao staged para commitar." -ForegroundColor Yellow
-} else {
+if ($staged) {
+  $staged
   git commit -m $Message
+} else {
+  Write-Host "Nenhuma alteracao para commitar." -ForegroundColor Yellow
 }
 
 Write-Step "Push"
-git push origin $branch
+git push -u origin $branch
+if ($LASTEXITCODE -ne 0) { throw "Push falhou." }
 
 Write-Host ""
-Write-Host "Deploy/upload para GitHub concluido com sucesso." -ForegroundColor Green
+if ($branch -eq "main") {
+  Write-Host "Enviado. Vercel publica em producao em ~30s." -ForegroundColor Green
+} else {
+  Write-Host "Enviado. Vercel gera um Preview desta branch; abra um PR para a main." -ForegroundColor Green
+}
