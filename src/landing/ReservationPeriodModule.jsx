@@ -125,8 +125,8 @@ export function ReservationPeriodModule({ config, theme, editMode = false, onEdi
   }
 
   return (
-    <section id="agenda" className="bg-[var(--preview-section)] py-24">
-      <div className="section-shell grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <section id="agenda" className="bg-[var(--preview-section)] py-14 sm:py-24">
+      <div className="section-shell grid gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <div>
           <SectionIntro
             eyebrow={preset.sectionLabels.schedule}
@@ -137,7 +137,7 @@ export function ReservationPeriodModule({ config, theme, editMode = false, onEdi
           <div className="mt-8"><SmartContactList whatsapp={business.whatsapp || submission.whatsapp} email={business.email || submission.email} address={location.address} isOwner={editMode} onEditField={onEditContact} /></div>
         </div>
 
-        <div className={cardClass(theme, 'p-5 shadow-[var(--preview-shadow)]')} style={{ borderRadius: theme.radius }}>
+        <div id="agendar" className={cardClass(theme, 'scroll-mt-20 p-4 shadow-[var(--preview-shadow)] sm:p-5')} style={{ borderRadius: theme.radius }}>
           <div className="rounded-3xl border border-[var(--preview-border)] bg-[var(--preview-card)] p-4">
             <div className="mb-4 flex items-center justify-between gap-3">
               <button type="button" onClick={() => setVisibleMonth((current) => new Date(current.getFullYear(), current.getMonth() - 1, 1))} disabled={isSameMonth(visibleMonth, today)} className="grid h-10 w-10 place-items-center rounded-full bg-[var(--preview-surface)] disabled:opacity-35" aria-label="Mês anterior">

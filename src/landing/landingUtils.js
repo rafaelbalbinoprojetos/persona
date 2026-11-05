@@ -1,14 +1,55 @@
 import { Facebook, Globe, Instagram, Linkedin, Music2, Youtube } from 'lucide-react';
 
-/** Retorna o profissional principal da config com fallbacks garantidos. */
+/**
+ * Profissional principal. Só devolve dados cadastrados: nada de bio,
+ * especialidade ou foto inventadas a partir do preset do segmento.
+ */
 export function getFeaturedProfessional(config) {
   const professional = config.professionals?.[0] || {};
   return {
     name: professional.name || config.business.name,
-    specialty: professional.specialty || config.preset.label,
-    photo_url: professional.photo_url || config.branding.hero_image_url,
-    bio: professional.bio || config.preset.professionalBio,
+    specialty: professional.specialty || '',
+    registration: professional.registration || '',
+    photo_url: professional.photo_url || '',
+    bio: professional.bio || '',
   };
+}
+
+const WEEKDAY_LABELS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const WEEKDAY_SHORT = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+/**
+ * Horário de funcionamento a partir das regras reais de disponibilidade.
+ * Agrupa dias consecutivos com o mesmo horário: "Seg – Sex · 08:00 – 18:00".
+ */
+export function getOpeningHours(rules = []) {
+  const byDay = new Map();
+  (Array.isArray(rules) ? rules : []).forEach((rule) => {
+    const day = Number(rule.weekday);
+    if (!Number.isInteger(day) || day < 0 || day > 6 || !rule.start_time || !rule.end_time) return;
+    if (rule.is_active === false) return;
+    const range = `${String(rule.start_time).slice(0, 5)} – ${String(rule.end_time).slice(0, 5)}`;
+    byDay.set(day, byDay.has(day) ? `${byDay.get(day)}, ${range}` : range);
+  });
+  if (!byDay.size) return [];
+
+  // Segunda primeiro, domingo por último.
+  const order = [1, 2, 3, 4, 5, 6, 0].filter((day) => byDay.has(day));
+  const groups = [];
+  order.forEach((day) => {
+    const last = groups[groups.length - 1];
+    const prevDay = last ? last.days[last.days.length - 1] : null;
+    const consecutive = last && (day === (prevDay + 1) % 7) && last.hours === byDay.get(day);
+    if (consecutive) last.days.push(day);
+    else groups.push({ days: [day], hours: byDay.get(day) });
+  });
+
+  return groups.map(({ days, hours }) => ({
+    label: days.length === 1
+      ? WEEKDAY_LABELS[days[0]]
+      : `${WEEKDAY_SHORT[days[0]]} – ${WEEKDAY_SHORT[days[days.length - 1]]}`,
+    hours,
+  }));
 }
 
 /** Monta a lista de redes sociais ativas com URLs normalizadas. */
@@ -202,13 +243,13 @@ export function getPublicTestimonialName(testimonial, preset) {
   return (
     testimonial.customer_name?.trim()
     || testimonial.public_initials?.trim()
-    || (preset?.label === 'Odontologia' ? 'Paciente verificado' : 'Cliente verificado')
+    || (preset?.key === 'dental' || preset?.key === 'medical' ? 'Paciente' : 'Cliente')
   );
 }
 
 /** Iniciais para o avatar do depoimento. */
 export function getTestimonialInitials(testimonial) {
-  const source = testimonial.public_initials || testimonial.customer_name || 'CV';
+  const source = testimonial.public_initials || testimonial.customer_name || '';
   return (
     String(source)
       .trim()
@@ -216,7 +257,7 @@ export function getTestimonialInitials(testimonial) {
       .map((part) => part.charAt(0))
       .join('')
       .slice(0, 2)
-      .toUpperCase() || 'CV'
+      .toUpperCase() || '•'
   );
 }
 
@@ -229,46 +270,15 @@ export function normalizeGalleryItems(items = []) {
   }));
 }
 
-/** Gera FAQs padrão quando não há dados cadastrados. */
-export function normalizeFaqs(items = [], config) {
-  if (items.length) {
-    return items.map((item) => ({
-      question: item.question || item.title || 'Pergunta frequente',
-      answer: item.answer || item.description || 'Resposta personalizada carregada do cadastro.',
-    }));
-  }
-
-  const serviceLabel = config.preset.sectionLabels.services.toLowerCase();
-  const scheduleLabel = config.preset.sectionLabels.schedule.toLowerCase();
-  if (isVenueVertical(config.vertical)) {
-    return [
-      {
-        question: 'Como funciona a reserva?',
-        answer: 'Você escolhe a data desejada, envia os detalhes principais e recebe o retorno para confirmação de disponibilidade.',
-      },
-      {
-        question: 'Quais opções de reserva estão disponíveis?',
-        answer: 'A página apresenta os principais formatos cadastrados para o espaço, como fim de semana, diária ou eventos.',
-      },
-      {
-        question: 'Como recebo a confirmação?',
-        answer: 'A solicitação fica registrada para acompanhamento e confirmação dos próximos passos da reserva.',
-      },
-    ];
-  }
-
-  return [
-    {
-      question: `Como funciona o ${scheduleLabel}?`,
-      answer: 'Você escolhe uma data e horário disponível na agenda online e envia a solicitação em poucos segundos.',
-    },
-    {
-      question: `Quais ${serviceLabel} estão disponíveis?`,
-      answer: `A página apresenta os principais ${serviceLabel} cadastrados pelo profissional, com tempo, descrição e valor quando informado.`,
-    },
-    {
-      question: 'Como recebo a confirmação?',
-      answer: 'A solicitação fica registrada no sistema para que o profissional acompanhe e confirme o atendimento.',
-    },
-  ];
+/**
+ * FAQs cadastradas pelo cliente. Sem perguntas genéricas geradas
+ * automaticamente: se não houver conteúdo, a seção some para visitantes.
+ */
+export function normalizeFaqs(items = []) {
+  return (Array.isArray(items) ? items : [])
+    .map((item) => ({
+      question: String(item?.question || item?.title || '').trim(),
+      answer: String(item?.answer || item?.description || '').trim(),
+    }))
+    .filter((item) => item.question && item.answer);
 }

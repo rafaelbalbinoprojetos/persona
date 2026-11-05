@@ -20,6 +20,7 @@ import {
 } from './dateUtils.js';
 import { SectionIntro } from './LandingShared.jsx';
 import { SmartContactList } from './EditablePrimitives.jsx';
+import { SELECT_SERVICE_EVENT } from './ServicesModule.jsx';
 
 export function ScheduleModule({ config, theme, editMode = false, onEditContact }) {
   const { submission, business, location, availability, availabilityBreaks, availabilityDateBlocks, preset } = config;
@@ -84,6 +85,16 @@ export function ScheduleModule({ config, theme, editMode = false, onEditContact 
       customerWhatsAppDigits.length >= 10,
   );
 
+  // Serviço escolhido em um card da seção de serviços vira o motivo do agendamento.
+  useEffect(() => {
+    const onSelect = (event) => {
+      const name = event.detail?.name;
+      if (name) setAppointmentReason(name);
+    };
+    window.addEventListener(SELECT_SERVICE_EVENT, onSelect);
+    return () => window.removeEventListener(SELECT_SERVICE_EVENT, onSelect);
+  }, []);
+
   useEffect(() => {
     async function loadBookedSlots() {
       if (!isSupabaseConfigured) return;
@@ -145,6 +156,13 @@ export function ScheduleModule({ config, theme, editMode = false, onEditContact 
       return;
     }
 
+    // Página de demonstração: não grava nada no banco.
+    if (submission.is_demo) {
+      setAppointmentStatus('success');
+      setAppointmentMessage('Demonstração: em uma página real, esta solicitação chegaria à agenda da clínica.');
+      return;
+    }
+
     setAppointmentStatus('saving');
     setAppointmentMessage('');
 
@@ -187,8 +205,8 @@ export function ScheduleModule({ config, theme, editMode = false, onEditContact 
   }
 
   return (
-    <section id="agenda" className="bg-[var(--preview-section)] py-24">
-      <div className="section-shell grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <section id="agenda" className="bg-[var(--preview-section)] py-14 sm:py-24">
+      <div className="section-shell grid gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <div>
           <SectionIntro
             eyebrow={preset.sectionLabels.schedule}
@@ -202,7 +220,7 @@ export function ScheduleModule({ config, theme, editMode = false, onEditContact 
           )}
         </div>
 
-        <div className={cardClass(theme, 'p-5 shadow-[var(--preview-shadow)]')} style={{ borderRadius: theme.radius }}>
+        <div id="agendar" className={cardClass(theme, 'scroll-mt-20 p-4 shadow-[var(--preview-shadow)] sm:p-5')} style={{ borderRadius: theme.radius }}>
           {/* ── Calendário ── */}
           <div className="rounded-3xl border border-[var(--preview-border)] bg-[var(--preview-card)] p-4">
             <div className="mb-4 flex items-center justify-between gap-3">

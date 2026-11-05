@@ -1,29 +1,13 @@
-import Header from '../components/Header.jsx';
-import Hero from '../components/Hero.jsx';
-import Services from '../components/Services.jsx';
-import Benefits from '../components/Benefits.jsx';
-import OnlineSchedule from '../components/OnlineSchedule.jsx';
-import Team from '../components/Team.jsx';
-import Testimonials from '../components/Testimonials.jsx';
-import FAQ from '../components/FAQ.jsx';
-import FinalCTA from '../components/FinalCTA.jsx';
-import Footer from '../components/Footer.jsx';
+import { useMemo } from 'react';
+import { PreviewLanding } from './PreviewPage.jsx';
+import { getDemoSubmission } from '../landing/demoSubmission.js';
 
+/**
+ * /demo/personapro — demonstração renderizada pelo mesmo motor das páginas
+ * dos clientes, para que qualquer melhoria (mobile, tema, acessibilidade)
+ * valha igualmente para a demo e para todos os clientes.
+ */
 export default function ClientLanding() {
-  return (
-    <div className="overflow-hidden bg-[#f8fbff]">
-      <Header />
-      <main>
-        <Hero />
-        <Services />
-        <Benefits />
-        <OnlineSchedule />
-        <Team />
-        <Testimonials />
-        <FAQ />
-        <FinalCTA />
-      </main>
-      <Footer />
-    </div>
-  );
+  const submission = useMemo(() => getDemoSubmission(), []);
+  return <PreviewLanding submission={submission} isLive />;
 }

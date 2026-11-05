@@ -63,9 +63,17 @@ export function SmartContactList({ whatsapp, email, address, isOwner = false, on
       {items.map(({ key, label, value, Icon }) => {
         if (hasValue(value)) {
           return (
-            <div key={key} className="flex items-center gap-3 font-bold">
-              <Icon size={19} className="text-[var(--preview-primary)]" />
-              <span>{value}</span>
+            <div key={key} className="flex items-start gap-3 font-bold">
+              <Icon size={17} className="mt-0.5 shrink-0 text-[var(--preview-primary)]" aria-hidden="true" />
+              <a
+                href={contactHref(key, value)}
+                target={key === 'email' ? undefined : '_blank'}
+                rel="noreferrer"
+                className="break-words transition hover:text-[var(--preview-primary)]"
+              >
+                <span className="sr-only">{label}: </span>
+                {key === 'whatsapp' ? formatPhone(value) : value}
+              </a>
               {isOwner && (
                 <button
                   type="button"
@@ -93,6 +101,21 @@ export function SmartContactList({ whatsapp, email, address, isOwner = false, on
       })}
     </div>
   );
+}
+
+function contactHref(key, value) {
+  const raw = String(value || '').trim();
+  if (key === 'email') return `mailto:${raw}`;
+  if (key === 'address') return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(raw)}`;
+  const digits = raw.replace(/\D/g, '');
+  return `https://wa.me/${digits.length <= 11 ? `55${digits}` : digits}`;
+}
+
+function formatPhone(value) {
+  const digits = String(value || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '');
+  if (digits.length === 11) return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  if (digits.length === 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return value;
 }
 
 export function SmartSocialLinks({ links = [], isOwner = false, onAdd, renderLink }) {

@@ -30,26 +30,30 @@ const rawThemeTokens = [
   {
     key: 'clean-blue',
     name: 'Claro Azul',
-    primary: '#1c8dff',
-    secondary: '#0874e8',
-    accent: '#20c7a8',
-    background: '#f8fbff',
+    // Azul-marinho + branco, contraste AA para texto e botões.
+    primary: '#1f56b8',
+    secondary: '#0b2545',
+    accent: '#3d7be0',
+    background: '#ffffff',
+    section: '#f3f7fc',
     surface: '#ffffff',
-    surfaceAlt: '#fbfdff',
-    border: '#e8f0f8',
-    text: '#0b2346',
-    textSoft: '#29415f',
-    textMuted: '#607089',
-    gradientFrom: '#f8fbff',
-    gradientTo: '#eee6ff',
-    glow: '0 22px 60px rgba(28, 141, 255, 0.24)',
+    surfaceAlt: '#f7f9fd',
+    border: '#dde6f1',
+    text: '#0b1f3a',
+    textSoft: '#2a3d58',
+    textMuted: '#4f6079',
+    gradientFrom: '#f3f7fc',
+    gradientTo: '#e6eefa',
+    glow: '0 10px 30px rgba(11, 37, 69, 0.10)',
+    shadow: '0 1px 2px rgba(11, 37, 69, 0.05), 0 12px 32px rgba(11, 37, 69, 0.06)',
     mode: 'Claro',
     verticals: ['dental', 'medical'],
-    radius: '2rem',
-    heroRadius: '2.25rem',
-    cardStyle: 'glass',
-    buttonStyle: 'glow',
+    radius: '0.75rem',
+    heroRadius: '1rem',
+    cardStyle: 'solid',
+    buttonStyle: 'soft',
     fontStyle: 'modern',
+    displayFont: "'Fraunces', Georgia, serif",
     sectionSpacing: 'py-24',
   },
   {
@@ -414,7 +418,61 @@ export function themeToCssVars(theme) {
     '--preview-hero-overlay': theme.heroOverlay,
     '--preview-fallback': theme.fallback,
     '--preview-section-spacing': theme.sectionSpacing,
+    '--preview-display-font': theme.displayFont || 'Inter, ui-sans-serif, system-ui, sans-serif',
   };
+}
+
+// Cor padrão antiga gravada pelo onboarding/editor: não conta como escolha
+// do cliente (senão todos herdariam o azul neon antigo).
+const LEGACY_DEFAULT_PRIMARIES = new Set(['#1c8dff']);
+
+/**
+ * Aplica a cor principal escolhida pelo cliente ao tema, garantindo
+ * contraste mínimo AA (4.5:1) com texto branco nos botões.
+ */
+export function applyBrandColor(theme, color) {
+  const hex = String(color || '').trim().toLowerCase();
+  if (!/^#[0-9a-f]{6}$/.test(hex) || LEGACY_DEFAULT_PRIMARIES.has(hex) || hex === theme.primary.toLowerCase()) {
+    return theme;
+  }
+  const isDark = /^dark|black/.test(theme.key);
+  const primary = isDark ? hex : ensureContrastWithWhite(hex);
+  return {
+    ...theme,
+    primary,
+    accent: hex,
+    glow: isDark ? theme.glow : `0 10px 30px ${hexToRgba(primary, 0.16)}`,
+  };
+}
+
+function ensureContrastWithWhite(hex) {
+  let [r, g, b] = hexToRgb(hex);
+  for (let step = 0; step < 20 && contrastWithWhite(r, g, b) < 4.5; step += 1) {
+    r = Math.round(r * 0.88);
+    g = Math.round(g * 0.88);
+    b = Math.round(b * 0.88);
+  }
+  return `#${[r, g, b].map((value) => value.toString(16).padStart(2, '0')).join('')}`;
+}
+
+function contrastWithWhite(r, g, b) {
+  const lum = [r, g, b]
+    .map((value) => {
+      const c = value / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    })
+    .reduce((acc, c, index) => acc + c * [0.2126, 0.7152, 0.0722][index], 0);
+  return 1.05 / (lum + 0.05);
+}
+
+function hexToRgb(hex) {
+  const value = hex.replace('#', '');
+  return [0, 2, 4].map((index) => parseInt(value.slice(index, index + 2), 16));
+}
+
+function hexToRgba(hex, alpha) {
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export function cardClass(theme, extra = '') {
@@ -433,7 +491,7 @@ export function cardClass(theme, extra = '') {
 export function buttonClass(theme, extra = '') {
   const base = {
     glow: 'text-white shadow-[var(--preview-glow)] hover:-translate-y-1',
-    soft: 'text-white shadow-[var(--preview-glow)] hover:-translate-y-1',
+    soft: 'text-white shadow-sm hover:brightness-110',
     pill: 'text-white shadow-[var(--preview-glow)] hover:-translate-y-1',
     outline: 'border border-[var(--preview-border)] bg-[var(--preview-surface)] text-[var(--preview-text)] hover:-translate-y-1',
   }[theme.buttonStyle] || 'text-white shadow-[var(--preview-glow)] hover:-translate-y-1';

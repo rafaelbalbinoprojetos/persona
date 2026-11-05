@@ -1293,3 +1293,13 @@ Historico inicial consolidado:
 - tema premium `dark-editorial`;
 - fallbacks inteligentes e CMS inline contextual.
 
+
+## Deploy e migrations (atualizado 2026-11-05)
+
+- Supabase de producao: projeto `PERSONA` (`wvgchojyezmsiuimiqau`), linkado via `npx supabase link`.
+- Novas mudancas de banco: `supabase/migrations/<timestamp>_nome.sql` (criar com `npx supabase migration new nome`).
+- Os SQL antigos ficaram em `supabase/legacy/` apenas como referencia; ja estao aplicados em producao e nao rodam mais.
+- Aplicar migrations: `npx supabase db push --linked` (ou automatico pelo GitHub Actions no merge para `main`).
+- Front: integracao GitHub -> Vercel (branch = Preview, `main` = Producao).
+- CI: `.github/workflows/ci-deploy.yml` (build em PR; build + migrations na `main`). Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`.
+- Deploy completo: `.deploy-persona.ps1 -Message "..."` (build, migrations, commit, merge na main, push). Gatilho no Claude: "deploy persona".
