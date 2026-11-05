@@ -1,5 +1,5 @@
 import { defaultEnabledModules, detectVertical, generateFallbackHeroCopy, getPresetByVertical, getRecommendedThemeKey } from './presets.js';
-import { getTheme } from './theme.js';
+import { applyBrandColor, getTheme } from './theme.js';
 
 export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
   const payload = submission.payload || {};
@@ -17,13 +17,16 @@ export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
   const vertical = detectVertical(business.segment || submission.segment || submission.business_name);
   const preset = getPresetByVertical(vertical);
   const themeKey = selectedThemeKey || branding.theme_key || getRecommendedThemeKey(vertical);
-  const theme = getTheme(themeKey, preset.recommendedTheme);
+  const theme = applyBrandColor(
+    getTheme(themeKey, preset.recommendedTheme),
+    branding.primary_color || branding.primaryColor,
+  );
   const fallbackHero = generateFallbackHeroCopy(vertical);
   const enabledModules = {
     ...defaultEnabledModules,
     ...(payload.enabledModules || payload.enabled_modules || {}),
   };
-  const services = normalizeServices(payload.services || [], preset);
+  const services = normalizeServices(payload.services || []);
 
   return {
     submission,
@@ -44,7 +47,7 @@ export function buildPageConfigFromOnboarding(submission, selectedThemeKey) {
     services,
     trustStats: normalizeTrustStats(payload.trustStats || payload.trust_stats || []),
     editorialHighlight: payload.editorialHighlight || payload.editorial_highlight || {},
-    professionals: payload.professionals || [],
+    professionals: normalizeProfessionals(payload.professionals || []),
     testimonials: payload.testimonials || [],
     faqs: payload.faqs || [],
     gallery: payload.gallery || payload.business_media || [],
@@ -67,16 +70,29 @@ function normalizeTrustStats(items) {
     .filter((item) => item.label && item.value);
 }
 
-function normalizeServices(services, preset) {
-  if (services.length) return services;
+export function hasServiceName(service) {
+  return Boolean(String(service?.name || '').trim());
+}
 
-  return preset.services.slice(0, 4).map((name, index) => ({
-    name,
-    description: `Serviço sugerido para ${preset.label.toLowerCase()}, pronto para personalização no painel.`,
-    duration: index === 0 ? 30 : 45,
-    price: '',
-    image_url: '',
-  }));
+// Apenas serviços realmente cadastrados. Sem cards de exemplo na página
+// publicada: o dono vê um estado vazio editável no lugar.
+function normalizeServices(services) {
+  // Mantém os índices do payload (a edição inline usa o índice); quem exibe
+  // filtra itens sem nome com hasServiceName().
+  return (Array.isArray(services) ? services : []).filter((service) => service && typeof service === 'object');
+}
+
+function normalizeProfessionals(items) {
+  return (Array.isArray(items) ? items : [])
+    .filter((item) => item && String(item.name || '').trim())
+    .map((item) => ({
+      ...item,
+      name: String(item.name).trim(),
+      specialty: String(item.specialty || '').trim(),
+      registration: String(item.registration || item.council_registration || item.cro || item.crm || '').trim(),
+      bio: String(item.bio || '').trim(),
+      photo_url: item.photo_url || item.photoUrl || '',
+    }));
 }
 
 function normalizeConversion(conversion = {}, preset, services = []) {
@@ -116,7 +132,7 @@ function normalizeConversion(conversion = {}, preset, services = []) {
     successMessage: 'Reserva solicitada com sucesso. Em breve enviaremos a confirmação.',
   };
   const fallback = isVenueAppointment ? venueAppointmentDefaults : defaults[mode] || defaults.appointment;
-  const serviceOptions = services.map((service) => service.name).filter(Boolean);
+  const serviceOptions = services.map((service) => String(service.name || '').trim()).filter(Boolean);
   const rawTitle = conversion.title || conversion.conversionTitle || '';
   const rawSubtitle = conversion.subtitle || conversion.conversionSubtitle || '';
   const rawButtonLabel = conversion.buttonLabel || conversion.conversionButtonLabel || '';

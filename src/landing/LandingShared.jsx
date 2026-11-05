@@ -5,31 +5,35 @@ import { motion } from 'framer-motion';
 export const cinematicEase = [0.22, 1, 0.36, 1];
 
 export const reveal = {
-  hidden: { opacity: 0, y: 36, filter: 'blur(10px)' },
-  visible: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.85, ease: cinematicEase } },
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: cinematicEase } },
 };
 
 export const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.11, delayChildren: 0.08 } },
+  visible: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
 };
 
-export function SectionIntro({ eyebrow, title, description, align = 'center', tone = 'default' }) {
+export function SectionIntro({ eyebrow, title, description, align = 'center', tone = 'default', id }) {
   return (
     <motion.div
-      className={`mx-auto max-w-3xl ${align === 'left' ? 'text-left' : 'text-center'}`}
+      className={`max-w-3xl ${align === 'left' ? 'text-left' : 'mx-auto text-center'}`}
       variants={reveal}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-80px' }}
     >
-      <p className={`text-sm font-extrabold uppercase ${tone === 'light' ? 'text-violet-700' : 'text-[var(--preview-primary)]'}`}>
-        {eyebrow}
-      </p>
-      <h2 className="mt-4 text-4xl font-black leading-tight sm:text-5xl">
+      {eyebrow && (
+        <p className={`text-xs font-semibold uppercase tracking-[0.18em] ${tone === 'light' ? 'text-violet-700' : 'text-[var(--preview-primary)]'}`}>
+          {eyebrow}
+        </p>
+      )}
+      <h2 id={id} className="landing-display mt-2 text-[1.625rem] font-semibold leading-[1.15] sm:mt-3 tracking-[-0.015em] sm:text-[2.5rem] lg:text-[2.75rem]">
         {title}
       </h2>
-      <p className={`mt-5 text-lg leading-8 ${tone === 'light' ? 'text-slate-600' : 'text-[var(--preview-muted)]'}`}>{description}</p>
+      {description && (
+        <p className={`mt-3 text-[0.9375rem] leading-6 sm:mt-4 sm:text-lg sm:leading-8 ${tone === 'light' ? 'text-slate-600' : 'text-[var(--preview-muted)]'}`}>{description}</p>
+      )}
     </motion.div>
   );
 }

@@ -20,10 +20,10 @@ export function ConversionModule({ config, theme, editMode = false, onEditContac
   }
 
   return (
-    <section id="agenda" className="bg-[var(--preview-section)] py-24">
-      <div className="section-shell grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+    <section id="agenda" className="bg-[var(--preview-section)] py-14 sm:py-24">
+      <div className="section-shell grid gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <ConversionIntro config={config} editMode={editMode} onEditContact={onEditContact} />
-        <div className={cardClass(theme, 'p-5 shadow-[var(--preview-shadow)]')} style={{ borderRadius: theme.radius }}>
+        <div id="agendar" className={cardClass(theme, 'scroll-mt-20 p-4 shadow-[var(--preview-shadow)] sm:p-5')} style={{ borderRadius: theme.radius }}>
           {mode === 'request' && <RequestForm config={config} theme={theme} />}
           {mode === 'consultation' && <ConsultationForm config={config} theme={theme} />}
           {mode === 'lead' && <LeadForm config={config} theme={theme} />}

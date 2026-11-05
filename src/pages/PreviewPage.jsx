@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { MotionConfig } from 'framer-motion';
+import { CalendarDays } from 'lucide-react';
 import { isSupabaseConfigured, supabase } from '../lib/supabaseClient.js';
-import { buildPageConfigFromOnboarding } from '../landing/pageConfig.js';
+import { getHeaderCtaLabel } from '../landing/HeaderModule.jsx';
+import { hasEditorialContent } from '../landing/EditorialHighlightModule.jsx';
+import { hasTeamContent } from '../landing/SignatureModule.jsx';
+import { normalizeFaqs } from '../landing/landingUtils.js';
+import { buttonClass } from '../landing/theme.js';
+import { buildPageConfigFromOnboarding, hasServiceName } from '../landing/pageConfig.js';
 import { themeToCssVars } from '../landing/theme.js';
 import { applyPageSeo, buildSeoFromConfig } from '../landing/seo.js';
 import { SubscribeModal } from '../components/SubscribeModal.jsx';
@@ -88,7 +95,7 @@ export default function PreviewPage() {
   return <PreviewLanding submission={submission} isLive={isLive} />;
 }
 
-function PreviewLanding({ submission, isLive = true }) {
+export function PreviewLanding({ submission, isLive = true }) {
   const storedTheme = localStorage.getItem(`preview-theme:${submission.slug}`);
   const [localSubmission, setLocalSubmission] = useState(submission);
   const [session, setSession] = useState(null);
@@ -102,8 +109,46 @@ function PreviewLanding({ submission, isLive = true }) {
   const config = useMemo(() => buildPageConfigFromOnboarding(localSubmission, themeKey), [localSubmission, themeKey]);
   const themeStyle = useMemo(() => themeToCssVars(config.theme), [config.theme]);
   const modules = config.enabledModules;
-  const editorial = config.theme.key === 'dark-editorial';
   const canEdit = Boolean(session?.user?.id && localSubmission.owner_id && session.user.id === localSubmission.owner_id);
+  const [testimonialsCount, setTestimonialsCount] = useState(0);
+
+  // Visibilidade real de cada seção para o VISITANTE: módulo ativo + conteúdo
+  // cadastrado. A navegação e as âncoras são derivadas daqui, então seções
+  // ocultas nunca deixam links quebrados nem espaços vazios.
+  const visible = useMemo(() => ({
+    stats: Boolean(modules.trustStats) && config.trustStats.length > 0,
+    services: Boolean(modules.services) && config.services.some(hasServiceName),
+    team: Boolean(modules.services) && hasTeamContent(config),
+    about: Boolean(modules.editorialHighlight) && hasEditorialContent(config),
+    gallery: Boolean(modules.gallery) && config.gallery.some((item) => item?.image_url || item?.url),
+    conversion: Boolean(modules.schedule),
+    testimonials: Boolean(modules.testimonials) && testimonialsCount > 0,
+    faq: Boolean(modules.faq) && normalizeFaqs(config.faqs).length > 0,
+  }), [config, modules, testimonialsCount]);
+
+  // Aponta direto para o calendário/formulário (não para o topo da seção,
+  // onde ficam contato e localização).
+  const bookingHref = visible.conversion ? '#agendar' : '';
+  const whatsappDigits = String(config.business.whatsapp || localSubmission.whatsapp || '').replace(/\D/g, '');
+  const whatsappHref = whatsappDigits
+    ? `https://wa.me/${whatsappDigits.length <= 11 ? `55${whatsappDigits}` : whatsappDigits}`
+    : '';
+  const navItems = [
+    visible.services && { href: '#servicos', label: config.preset.sectionLabels.services },
+    visible.about && { href: '#sobre', label: 'Sobre' },
+    visible.team && { href: '#equipe', label: config.preset.sectionLabels.professionals || 'Equipe' },
+    visible.gallery && { href: '#galeria', label: 'Galeria' },
+    visible.testimonials && { href: '#depoimentos', label: 'Depoimentos' },
+    visible.faq && { href: '#faq', label: 'Dúvidas' },
+  ].filter(Boolean);
+  const heroPrimaryCta = bookingHref
+    ? { href: bookingHref, label: config.branding.cta_primary_text || getHeaderCtaLabel(config.conversion) }
+    : whatsappHref
+      ? { href: whatsappHref, label: 'Falar no WhatsApp' }
+      : null;
+  const heroSecondaryCta = visible.services
+    ? { href: '#servicos', label: `Ver ${String(config.preset.sectionLabels.services || 'serviços').toLowerCase()}` }
+    : null;
 
   // SEO dinâmico: atualiza título e meta tags para humanos e Google.
   // (Preview de link em redes sem JS é tratado pelo middleware.js na Vercel.)
@@ -113,6 +158,10 @@ function PreviewLanding({ submission, isLive = true }) {
 
   useEffect(() => {
     let active = true;
+    if (!supabase) {
+      setSessionChecked(true);
+      return undefined;
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (active) {
         setSession(data.session);
@@ -386,7 +435,9 @@ function PreviewLanding({ submission, isLive = true }) {
   }
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[var(--preview-bg)] text-[var(--preview-text)]" style={themeStyle}>
+    <MotionConfig reducedMotion="user">
+    <div className="landing-root min-h-screen overflow-x-clip bg-[var(--preview-bg)] text-[var(--preview-text)] antialiased" style={themeStyle}>
+      <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
       {!isLive && canEdit && (
         <div className="fixed inset-x-0 bottom-0 z-[60] flex flex-wrap items-center justify-center gap-3 bg-amber-500 px-4 py-3 text-center text-sm font-bold text-amber-950 shadow-[0_-6px_24px_rgba(0,0,0,0.18)]">
           <span>Seu período de teste terminou — sua página está fora do ar para visitantes.</span>
@@ -431,6 +482,8 @@ function PreviewLanding({ submission, isLive = true }) {
       <HeaderModule
         config={config}
         theme={config.theme}
+        navItems={navItems}
+        ctaHref={bookingHref}
         onOpenSettings={() => setSettingsOpen(true)}
         onSignOut={signOut}
         onLogoUpload={uploadLogo}
@@ -444,30 +497,34 @@ function PreviewLanding({ submission, isLive = true }) {
         onSelect={handleThemeSelect}
       />
 
-      <main>
+      <main id="conteudo" tabIndex={-1} className="outline-none">
         {modules.hero && (
           <HeroModule
             config={config}
             theme={config.theme}
             editMode={canEdit}
             editStatus={editStatus}
+            primaryCta={heroPrimaryCta}
+            secondaryCta={heroSecondaryCta}
             onHeroTextChange={updateHeroText}
             onProfessionalTextChange={updatePrimaryProfessionalText}
             onHeroImageUpload={uploadHeroImage}
           />
         )}
-        {modules.trustStats && (editorial || config.trustStats.length > 0) && <TrustStatsModule config={config} theme={config.theme} />}
+        {visible.stats && <TrustStatsModule config={config} theme={config.theme} />}
         {modules.services && (
           <ServicesModule
             config={config}
             theme={config.theme}
             editMode={canEdit}
+            bookingHref={bookingHref}
             onServiceTextChange={updateServiceText}
             onServiceImageUpload={uploadServiceImage}
             onAddService={addVisualService}
             onRemoveService={removeVisualService}
           />
         )}
+        {visible.about && <EditorialHighlightModule config={config} theme={config.theme} />}
         {modules.services && (
           <SignatureModule
             config={config}
@@ -476,7 +533,6 @@ function PreviewLanding({ submission, isLive = true }) {
             onProfessionalTextChange={updatePrimaryProfessionalText}
           />
         )}
-        {modules.editorialHighlight && (editorial || config.editorialHighlight?.title) && <EditorialHighlightModule config={config} theme={config.theme} />}
         {(modules.gallery || canEdit) && (
           <GalleryModule
             config={config}
@@ -487,22 +543,38 @@ function PreviewLanding({ submission, isLive = true }) {
             onRemoveGalleryItem={removeGalleryItem}
           />
         )}
+        {(modules.testimonials || canEdit) && (
+          <TestimonialsModule config={config} theme={config.theme} editMode={canEdit} onCountChange={setTestimonialsCount} />
+        )}
         {modules.schedule && <ConversionModule config={config} theme={config.theme} editMode={canEdit} onEditContact={editContactField} />}
-        {(modules.testimonials || canEdit) && <TestimonialsModule config={config} theme={config.theme} editMode={canEdit} />}
-        {(modules.faq || canEdit) && <FAQModule config={config} theme={config.theme} />}
+        {(modules.faq || canEdit) && <FAQModule config={config} theme={config.theme} editMode={canEdit} />}
         {modules.finalCta && (
           <FinalCTAModule
             config={config}
             theme={config.theme}
             editMode={canEdit}
+            ctaHref={bookingHref}
             onFinalCtaTextChange={updateFinalCtaText}
-            onCtaImageUpload={uploadHeroImage}
           />
         )}
       </main>
 
-      {modules.footer && <FooterModule config={config} theme={config.theme} editMode={canEdit} onEditContact={editContactField} onAddSocial={() => editContactField('instagram_url')} />}
+      {modules.footer && (
+        <FooterModule
+          config={config}
+          theme={config.theme}
+          navItems={navItems}
+          editMode={canEdit}
+          onEditContact={editContactField}
+          onAddSocial={() => editContactField('instagram_url')}
+        />
+      )}
+
+      {bookingHref && !(canEdit && (!isLive || (isTrialing && !trialBarHidden))) && (
+        <MobileBookingBar theme={config.theme} href={bookingHref} label={heroPrimaryCta?.label || getHeaderCtaLabel(config.conversion)} />
+      )}
     </div>
+    </MotionConfig>
   );
 }
 
@@ -749,4 +821,50 @@ function normalizeSlug(value) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Ação de agendamento fixa no celular. Aparece depois do Hero e some
+ * quando a própria seção de agenda está na tela, para não cobrir o
+ * formulário. Em telas ≥ sm o botão do cabeçalho já cumpre esse papel.
+ */
+function MobileBookingBar({ theme, href, label }) {
+  const [pastHero, setPastHero] = useState(false);
+  const [targetVisible, setTargetVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setPastHero(window.scrollY > window.innerHeight * 0.6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const target = document.querySelector(href);
+    if (!target || typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(([entry]) => setTargetVisible(entry.isIntersecting), { threshold: 0.05 });
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [href]);
+
+  const show = pastHero && !targetVisible;
+
+  return (
+    <div
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-[var(--preview-border)] bg-[var(--preview-surface)]/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md transition-transform duration-300 sm:hidden ${
+        show ? 'translate-y-0' : 'pointer-events-none translate-y-full'
+      }`}
+      aria-hidden={!show}
+    >
+      <a
+        href={href}
+        tabIndex={show ? 0 : -1}
+        className={buttonClass(theme, 'h-12 w-full')}
+        style={theme.buttonStyle === 'outline' ? undefined : { backgroundColor: theme.primary }}
+      >
+        <CalendarDays size={18} aria-hidden="true" />
+        {label}
+      </a>
+    </div>
+  );
 }

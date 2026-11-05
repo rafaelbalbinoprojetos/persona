@@ -1302,4 +1302,4 @@ Historico inicial consolidado:
 - Aplicar migrations: `npx supabase db push --linked` (ou automatico pelo GitHub Actions no merge para `main`).
 - Front: integracao GitHub -> Vercel (branch = Preview, `main` = Producao).
 - CI: `.github/workflows/ci-deploy.yml` (build em PR; build + migrations na `main`). Secrets: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`.
-- Script local: `.\deploy-github.ps1 -Message "..." [-Migrate]`.
+- Deploy completo: `.deploy-persona.ps1 -Message "..."` (build, migrations, commit, merge na main, push). Gatilho no Claude: "deploy persona".

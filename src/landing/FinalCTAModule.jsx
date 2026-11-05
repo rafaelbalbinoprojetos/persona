@@ -1,141 +1,92 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, ImagePlus } from 'lucide-react';
-import { getImageCandidates } from './imageUtils.js';
-import { getFeaturedProfessional, getSocialLinks, isVenueVertical } from './landingUtils.js';
+import { ArrowRight } from 'lucide-react';
+import { isVenueVertical } from './landingUtils.js';
 import { reveal } from './LandingShared.jsx';
 
-export function FinalCTAModule({ config, theme, editMode = false, onFinalCtaTextChange, onCtaImageUpload }) {
-  const professional = getFeaturedProfessional(config);
-  const imageSources = getImageCandidates(professional.photo_url || config.branding.hero_image_url);
-  const socialLinks = getSocialLinks(config);
-  const primarySocial = socialLinks[0];
+/**
+ * Chamada final. Faixa sólida na cor secundária (azul-marinho no tema
+ * padrão), com textos editáveis e no máximo duas ações funcionais.
+ */
+export function FinalCTAModule({ config, theme, editMode = false, ctaHref = '', onFinalCtaTextChange }) {
   const isVenue = isVenueVertical(config.vertical);
-  const editorial = theme.key === 'dark-editorial';
   const whatsapp = String(config.business.whatsapp || config.submission.whatsapp || '').replace(/\D/g, '');
-  const defaultSubtitle = isVenue
-    ? `Consulte a disponibilidade de ${professional.name || config.business.name} e envie os detalhes da sua reserva.`
-    : `Agende uma avaliação com ${professional.name || config.business.name} e tenha uma experiência conduzida com clareza, cuidado e presença profissional.`;
+  const whatsappHref = whatsapp ? `https://wa.me/${whatsapp.length <= 11 ? `55${whatsapp}` : whatsapp}` : '';
   const finalCta = {
-    title: config.finalCta?.title || (isVenue ? 'Pronto para reservar sua data?' : 'Pronto para começar sua transformação?'),
-    subtitle: config.finalCta?.subtitle || defaultSubtitle,
-    buttonLabel: config.finalCta?.buttonLabel || (isVenue ? 'Solicitar reserva' : 'Agendar avaliação'),
+    title: config.finalCta?.title || (isVenue ? 'Consulte a disponibilidade da sua data' : 'Agende seu atendimento'),
+    subtitle: config.finalCta?.subtitle || '',
+    buttonLabel: config.finalCta?.buttonLabel || (isVenue ? 'Solicitar reserva' : 'Agendar agora'),
   };
 
+  if (!ctaHref && !whatsappHref && !editMode) return null;
+
+  const editable = (extra = '') =>
+    editMode
+      ? `cursor-text rounded-md outline-none ring-1 ring-transparent transition hover:ring-white/30 focus:ring-2 focus:ring-white/50 ${extra}`
+      : extra;
+
   return (
-    <section className="relative overflow-hidden bg-[var(--preview-section)] py-28">
+    <section aria-labelledby="cta-final-title" className="bg-[var(--preview-bg)] py-12 sm:py-20">
       <div className="section-shell">
         <motion.div
           variants={reveal}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
-          className="relative overflow-hidden p-8 text-white shadow-[var(--preview-glow)] sm:p-12 lg:p-16"
-          style={{
-            background: `radial-gradient(circle at 78% 15%, ${theme.accent}55 0, transparent 28%), linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-            borderRadius: theme.heroRadius,
-          }}
+          viewport={{ once: true, margin: '-80px' }}
+          className="flex flex-col gap-8 px-6 py-12 text-white sm:px-12 sm:py-14 lg:flex-row lg:items-center lg:justify-between lg:px-16"
+          style={{ backgroundColor: theme.secondary || theme.primary, borderRadius: theme.heroRadius }}
         >
-          {editorial && imageSources.length > 0 && (
-            <>
-              <img src={imageSources[0]} alt="" className="absolute inset-0 h-full w-full object-cover opacity-35" />
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,7,13,0.96),rgba(5,7,13,0.78)_58%,rgba(5,7,13,0.42))]" />
-            </>
-          )}
-          {!editorial && <div className="absolute -left-20 top-10 h-64 w-64 rounded-full bg-white/20 blur-3xl" />}
-          {!editorial && <div className="absolute -bottom-24 right-16 h-72 w-72 rounded-full bg-black/20 blur-3xl" />}
-
-          <div className="relative z-10 grid gap-10 lg:grid-cols-[1fr_320px] lg:items-center">
-            <div>
-              <p className="text-sm font-extrabold uppercase text-white/70">
-                Próximo passo
-              </p>
-              <h2
-                className={`mt-5 max-w-3xl rounded-2xl text-4xl font-black leading-tight outline-none sm:text-5xl lg:text-6xl ${
-                  editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
-                }`}
-                contentEditable={editMode}
-                suppressContentEditableWarning
-                onBlur={(event) => onFinalCtaTextChange?.('title', event.currentTarget.textContent)}
-              >
-                {finalCta.title}
-              </h2>
+          <div className="max-w-2xl">
+            <h2
+              id="cta-final-title"
+              className={editable('landing-display text-[1.875rem] font-semibold leading-tight tracking-[-0.015em] sm:text-[2.25rem]')}
+              contentEditable={editMode}
+              suppressContentEditableWarning
+              onBlur={(event) => onFinalCtaTextChange?.('title', event.currentTarget.textContent)}
+            >
+              {finalCta.title}
+            </h2>
+            {(finalCta.subtitle || editMode) && (
               <p
-                className={`mt-6 max-w-2xl rounded-2xl text-lg font-semibold leading-8 text-white/80 outline-none ${
-                  editMode ? 'cursor-text ring-2 ring-transparent transition focus:bg-white/10 focus:px-3 focus:py-2 focus:ring-white/35' : ''
-                }`}
+                className={editable('mt-4 text-base leading-7 text-white/80 sm:text-lg')}
                 contentEditable={editMode}
                 suppressContentEditableWarning
+                data-placeholder="Texto de apoio (opcional)"
                 onBlur={(event) => onFinalCtaTextChange?.('subtitle', event.currentTarget.textContent)}
               >
                 {finalCta.subtitle}
               </p>
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <a href="#agenda" className="pill-button bg-white text-[var(--preview-primary)] shadow-2xl">
+            )}
+          </div>
+
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+            {(ctaHref || editMode) && (
+              <a
+                href={ctaHref || '#top'}
+                onClick={(event) => { if (editMode) event.preventDefault(); }}
+                className="pill-button h-12 bg-white px-7 text-[var(--preview-text)] hover:bg-white/90"
+              >
                 <span
-                  className={editMode ? 'cursor-text rounded-lg outline-none ring-2 ring-transparent focus:bg-[var(--preview-primary)]/10 focus:px-1.5 focus:ring-[var(--preview-primary)]/25' : ''}
+                  className={editable()}
                   contentEditable={editMode}
                   suppressContentEditableWarning
-                  onClick={(event) => {
-                    if (editMode) event.preventDefault();
-                  }}
                   onBlur={(event) => onFinalCtaTextChange?.('buttonLabel', event.currentTarget.textContent)}
                 >
                   {finalCta.buttonLabel}
                 </span>
-                <ArrowRight size={18} />
+                <ArrowRight size={18} aria-hidden="true" />
               </a>
-                {whatsapp && (
-                  <a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer" className="pill-button border border-white/25 bg-white/10 text-white backdrop-blur-xl">
-                    WhatsApp
-                    <ArrowRight size={18} />
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {(imageSources.length > 0 || editMode) && <div className="hidden space-y-4 lg:block">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] border border-white/20 bg-white/15 shadow-2xl">
-                {imageSources.length ? (
-                  <img
-                    src={imageSources[0]}
-                    alt={professional.name || config.business.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <label className="grid h-full cursor-pointer place-items-center text-center text-white/80 transition hover:bg-white/10">
-                    <span><ImagePlus size={30} className="mx-auto" /><span className="mt-3 block text-sm font-extrabold">Adicionar foto ao CTA</span></span>
-                    <input type="file" accept="image/*" className="sr-only" onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (file) onCtaImageUpload?.(file);
-                      event.target.value = '';
-                    }} />
-                  </label>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-              </div>
-
-              {primarySocial && (
-                <motion.a
-                  href={primarySocial.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  whileHover={{ y: -4, scale: 1.01 }}
-                  className="flex items-center gap-4 rounded-[1.5rem] border border-white/20 bg-white/14 p-4 shadow-2xl backdrop-blur-2xl"
-                >
-                  <span className="grid h-12 w-12 place-items-center rounded-full bg-white/18">
-                    <primarySocial.Icon size={21} />
-                  </span>
-                  <span>
-                    <span className="block text-xs font-black uppercase text-white/60">
-                      Acompanhe
-                    </span>
-                    <span className="mt-1 block font-black">
-                      {primarySocial.handle || primarySocial.label}
-                    </span>
-                  </span>
-                </motion.a>
-              )}
-            </div>}
+            )}
+            {whatsappHref && (
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="pill-button h-12 border border-white/30 px-6 text-white hover:bg-white/10"
+              >
+                Conversar no WhatsApp
+                <span className="sr-only"> (abre em nova aba)</span>
+              </a>
+            )}
           </div>
         </motion.div>
       </div>
