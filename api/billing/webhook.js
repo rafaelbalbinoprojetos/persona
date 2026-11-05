@@ -71,7 +71,12 @@ export default async function handler(request, response) {
 
   // Validação do token enviado pelo Asaas.
   const token = request.headers['asaas-access-token'];
-  if (process.env.ASAAS_WEBHOOK_TOKEN && token !== process.env.ASAAS_WEBHOOK_TOKEN) {
+  // Falha fechada: sem token configurado, nenhum evento é aceito.
+  if (!process.env.ASAAS_WEBHOOK_TOKEN) {
+    console.error('ASAAS_WEBHOOK_TOKEN não configurado; webhook recusado.');
+    return response.status(503).json({ error: 'Webhook não configurado.' });
+  }
+  if (token !== process.env.ASAAS_WEBHOOK_TOKEN) {
     return response.status(401).json({ error: 'Token inválido.' });
   }
 
@@ -83,10 +88,10 @@ export default async function handler(request, response) {
     // Localiza a conta pela assinatura ou pelo cliente.
     let account = null;
     if (payment.subscription) {
-      account = await findAccount(`provider_subscription_id=eq.${payment.subscription}`);
+      account = await findAccount(`provider_subscription_id=eq.${encodeURIComponent(payment.subscription)}`);
     }
     if (!account && payment.customer) {
-      account = await findAccount(`provider_customer_id=eq.${payment.customer}`);
+      account = await findAccount(`provider_customer_id=eq.${encodeURIComponent(payment.customer)}`);
     }
     if (!account) {
       return response.status(200).json({ ok: true, ignored: 'conta não encontrada' });
